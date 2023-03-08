@@ -3,150 +3,19 @@
 #  Created for the 2023 Slime Salad Ridiculous Games Contest  #
 # =========================================================== #
 
-
-globalVariable(
-
-#shit to make scripts go
-	0,state
-	1,gameRunning
-  2,pauseGame
-  3,preTitlePlayed
-
-# Slices and slice collections
-	100,hud
-  101,titleText
-  102,commandMenu
-  104,gameMenu
-  105,scenarioMenu
-  106,lifeStoryWindow
-
-  110,sl
-
-# Input
-	200,cursor       # technically a slice. sue me
-	201,leftClick
-	202,rightClick
-	203,lmbDown
-	204,rmbDown
-  205,mouseTileX
-  206,mouseTileY
-  207,panRight
-  208,panLeft
-  209,panUp
-  210,panDown
-  211,escPressed
-  212,shiftPressed
-
-# Reserved
-  216,nicolaiCarpathia #In the books this was the antichrist's personal number, 6*6*6
-
-# Selection
-	220,selectedHudCommand
-  221,selectedUnit
-	222,selectedEnemy
-
-  230,unitClass
-  231,unitHp
-  232,unitHpMax
-  233,unitDef
-  234,unitStr
-  235,unitAtk
-  236,unitSp
-  237,unitSide
-  238,unitBackstory
-  239,unitSex
-  240,unitMarital
-  241,unitAge
-  242,unitLevel
-  243,unitExperience
-
-# Counters
-  999, npcIdCounter
-)
-
-defineConstant(
-
-# Unit Stats and Other Data
-# These are names for the "extra data" slots where we store our units' stats
-0,unitData:class
-1,unitData:curHp
-2,unitData:maxHp
-3,unitData:defense
-4,unitData:strength
-5,unitData:attackSpeed
-6,unitData:spirit
-7,unitData:side
-8,unitData:backStory
-9,unitData:level
-10,unitData:exp
-11,unitData:state
-12,unitData:directive
-13,unitData:target
-
-# Unit Classes - values for unitData:class
-0,unit:civilian
-1,unit:disciple
-2,unit:friend
-3,unit:medic
-4,unit:builder
-5,unit:musician
-6,unit:soldier
-
-# Unit Affiliations - values for unitData:side
-0,side:neutral
-1,side:saved
-2,side:damned
- 
-# Unit states - values for unitdata:state
-0,unitState:idle
-1,unitState:walking
-2,unitState:patrol
-3,unitState:attacking
-4,unitState:defending
-5,unitState:healing
-6,unitState:building
-7,unitState:following
-
-# Unit commands - values for unitData:directive
-# This is to resolve unit ADD and help them remember what to do when they're done walking
-0,command:idle
-1,command:patrol
-2,command:attack
-3,command:pray
-4,command:recruit
-5,command:acquire
-6,command:build
-7,command:preach
-8,command:convert
-9,command:rally
-10,command:survey
-12,command:sing
-
-# Mouse Cursors
-0,cursor:pointer
-1,cursor:pick
-2,cursor:no
-3,cursor:attack
-4,cursor:build
-5,cursor:survey
-6,cursor:renameMe
-7,cursor:renameMe2
-
-
-# states for main loop
-0,state:idle
-1,state:command
-2,state:target
-)
-
+include, efOHRces_ext.hsi
+include, efOHRces_input.hss
+include, efOHRces_units.hss
+include, efOHRces_menus.hss
+include, efOHRces_buildings.hss
 
 plotscript, titleScreen, begin
-  variable(menu,title,menuNewgame,menuLoadgame,menuExit,i,stopNoise)
+  variable(menu,title,menuNewgame,menuLoadgame,menuExit,i)
 
 # Disable default controls
   suspendPlayer
 
-  #if(preTitlePlayed == 0)then(preTitle())
+#  if(preTitlePlayed == 0)then(preTitle())
 
 #Display title screen
   showBackdrop(1)
@@ -241,28 +110,114 @@ while(true)do(
   ) #do
 end
 
+# Shows pre-title bumps for 3eg, HBA, and OHR
+plotscript, preTitle, begin
 
-#Starts up the game and sets some initial values for stuff
+# Start by defining variables to hold our text. Each one has a "shadow" double offset from it to give the illusion of depth
+  variable(textOnScreen,moreText,shadowText,moreShadowText,thirdText,thirdShadowText )
+  shadowText := createText
+  textOnScreen := createText
+  moreShadowText := createText
+  moreText := createText
+  thirdShadowText := createText
+  thirdText := createText
+  fadeScreenOut #black the screen while we change stuff
+  realignSlice(shadowText,edge:center,edge:middle,edge:center,edge:middle)
+  realignSlice(textOnScreen,edge:center,edge:middle,edge:center,edge:middle)
+  realignSlice(moreShadowText,edge:center,edge:middle,edge:center,edge:middle)
+  realignSlice(moreText,edge:center,edge:middle,edge:center,edge:middle)
+  realignSlice(thirdShadowText,edge:center,edge:middle,edge:center,edge:middle)
+  realignSlice(thirdText,edge:center,edge:middle,edge:center,edge:middle)
+  setTextColor(shadowText,96)
+  setTextColor(moreShadowText,96)
+  setTextColor(thirdShadowText,96)
+  setTextColor(textOnScreen,108)
+  setTextColor(moreText,74)
+  setOutline(textOnScreen,true)
+  setOutline(moreText,true)
+  setOutline(thirdText,true)
+  putSlice(textOnScreen,0,0)
+  putSlice(shadowText,2,3)
+  $0 = "Third Ear Games"
+  setSliceText(textOnScreen,0)
+  setSliceText(shadowText,0)
+  showBackdrop(2)           #put a black backdrop behind our text
+  wait(1)                   #make sure it stays black long enough
+  fadeScreenIn              #ok show the player
+  wait(175)                 #give em time to read
+  fadeScreenOut             #ok fuck em that's long enough, now do it all again for the next part
+  putSlice(textOnScreen,0,-12)
+  putSlice(shadowText,2,-9)
+  $0 = "in collaboration with"
+  setSliceText(textOnScreen,0)
+  setSliceText(shadowText,0)
+  putSlice(moreShadowText,2,3)
+  putSlice(moreText,0,0)
+  $0 = "Half Baked Media"
+  setSliceText(moreText,0)
+  setSliceText(moreShadowText,0)
+  $0 = "presents"
+  setSliceText(thirdText,0)
+  setSliceText(thirdShadowText,0)
+  putSlice(thirdText,0,13)
+  putSlice(thirdShadowText,2,16)
+  wait(36)
+  fadeScreenIn
+  wait(250)
+  fadeScreenOut
+  $0 = "A Ridiculous Game"
+  setSliceText(textOnScreen,0)
+  setSliceText(shadowText,0)
+  $0 = "powered by"
+  setSliceText(moreText,0)
+  setSliceText(moreShadowText,0)
+  $0 = "OHR RPG CE"
+  setSliceText(thirdText,0)
+  setSliceText(thirdShadowText,0)
+  wait(36)
+  fadeScreenIn
+  wait(250)
+  fadeScreenOut
+  freeSlice(textOnScreen)
+  freeSlice(shadowText)
+  freeSlice(moreText)
+  freeSlice(moreShadowText)
+  freeSlice(thirdText)
+  freeSlice(thirdShadowText)
+  preTitlePlayed := 1         #now we're done, so set this bit to true to keep it from playing again
+  wait(36)
+  resetInputs()               #clear out our inputs just in case
+  titleScreen()               #show the title screen menu
+end
+
+# Starts up the game and sets some initial values for stuff
 plotscript, bootstrap, begin
   setHeroPosition(me, -1, -1)
 
 # Load up the HUD
-	hud := loadSliceCollection(1)
+  hud := loadSliceCollection(1)
   setSliceVisible(lookupSlice(sli:unitStatsHud), false)
+
+# Initialize the slice that keeps player stats
+  playerStatSlice := createContainer
+  resizeExtra(playerStatSlice,5)
 
 # The command buttons have their own script. Should they? I do not have the answers.
   initCommandMenu()
 
 # Set the killswitch so we can shut down the main loop if we need and set the game state to idle.
-	gameRunning := true
+  gameRunning := true
   state := state:idle
 
 # Create the first unit and place it on the map
   npcIdCounter := 0 #This is a lazy way to ensure all units have unique NPC IDs and should be replaced by something more sophisticated
-  createUnit(unit:disciple, 5, 5)
+  createUnit(5, 5, unit:disciple)
 
 # lol idk what this is for, I'm going full cargo cult here
   selectedUnit := -1
+
+# Reset inputs just in case
+  resetInputs()
 
 # Wait so the screen can change before fade-in
   wait(10)
@@ -283,7 +238,7 @@ script, mainLoop, begin
     target      # for eliminating unit ADD
     x           # for mouse tile X
     y           # for mouse tile Y
-    stopNoise   # for keeping sfx from looping
+#    stopNoise   # for keeping sfx from looping
     hl          # for NPC hover highlight
     mapCursor   # for selecting a tile
     selector    # holds a slice used to select a section of map
@@ -291,17 +246,36 @@ script, mainLoop, begin
     mapTarget   # for selecting a target to attack
     i           # for loop counter
     j           # for loop counter
+    zonesHere   # used to store the number of zones under the cursor
     zoneWidth   # used to calculate an area of map
     zoneHeight  # used to calculate an area of map
     zoneTileY   # used to calculate an area of map
     zoneTileX   # used to calculate an area of map
     newZoneId   # used to generate new unique zone ID's
+    unitAttackCounter # used for combat
+    unitAttackSpeed   # used for combat
     )
     stopNoise := 0
     newZoneId := 0
+    #these are done in the title screen script and should be commented out when we add the title screen back in
+    startMouse()
+    suspendPlayer
+
+###########################################################
+
+# This iterates over the map and sets the zones up as buildings. It needs to be called per map and this might not be the best place to call it in the long run.
+
+buildingGen()
+
+###########################################################
+
+
   # The main loop that makes everything else go
   while(gameRunning) do(
-  
+
+  # Update the HUD
+    updateHud()
+
   # Draw the mouse cursor
     doMouse()
 
@@ -309,11 +283,18 @@ script, mainLoop, begin
     mouseTileX := (mousePixelX+cameraPixelX) / 20
     mouseTileY := (mousePixelY+cameraPixelY) / 20
 
-  # Mouse Hover Detection
+  # This is used to pick the hud element under the mouse cursor
+    sliceUnderMouse := topmostSliceAtPixel(hud,mousePixelX,mousePixelY)
+#    showValue(sliceUnderMouse)
+
+  # Used for mouse hover detection. I stole this from KiefKrack and I don't understand how it works.
     npc := nextNpcReference()
+
+  # For handling all unit behavior. I came up with this myself and I don't understand how it works.
     unit := nextNpcReference(unit)
 
     if(unit <> 0 )then(
+      setUnitSide(unit)
       if(getUnitStat(unit,unitData:curHp)<=0)then(
         deleteNpc(unit)
         )else(
@@ -332,20 +313,36 @@ script, mainLoop, begin
               # if in zone, begin automated walk routine
                   setNpcMoves(unit, true)
                   cancelNpcWalk(unit)
-                  alterNpc(unit,npcStat:moveType,npcMoveType:rightTurns)
+                  alterNpc(unit,npcStat:moveType,npcMoveType:followWallsRight)
                   alterNpc(unit,npcStat:defaultMovementZone,target)
                   )
               # if in zone and automated walking, do line of site
                 )
               case(command:attack)do(
               # check if target still exists
-                #if()
+                if(target)then(
                 #check and see if target is ahead
-                #if target is ahead, animate attack, get attack speed, reduce target HP
+                  if(npcAtSpot(npcX(unit)+dirX(unit),npcY(unit+dirY(unit))) == target)then(
+                      unitAttackSpeed := getUnitStat(unit,unitData:attackSpeed)
+                      unitAttackCounter := getUnitStat(unit(unitData:attackCounter))
+                      if(unitAttackCounter == unitAttackSpeed)then(
+                          #do attack animation stuff
+                          #do attack damage stuff
+                          setUnitStat(target,unitData:curHp,getUnitStat(target,unitData:curHp)--getUnitStat(unit,unitData:strength))
+                          showTextBox(1)
+                          unitAttackCounter := 0
+                          setUnitStat(unit,unitData:attackCounter, unitAttackCounter)
+                        ) else(
+                          unitAttackCounter += 1
+                          setUnitStat(unit,unitData:attackCounter, unitAttackCounter)
+                        )
+                  ) else(
                 #if target exists and is not ahead, continue chase behavior
-                )
-              )
-            )
+                  )
+                ) # end if(target)
+              ) # end case(command:attack)
+            ) # end switch(directive)
+          ) # end case(side:saved)
           case(side:damned)do(
             # Enemy AI goes here
             )
@@ -373,7 +370,7 @@ script, mainLoop, begin
     else(
         setSliceVisible(lookupSlice(sli:unitStatsHud), false)
         freeSlice(hl)
-        stopNoise := 0
+        #stopNoise := 0
         )
     
     switch(state) do (
@@ -382,29 +379,74 @@ script, mainLoop, begin
           if(topMenu == false) then(
               doGameMenu()
             ) else(
-              unselectUnit()
               closeMenu(topMenu)
             )
           ) elseif(leftClick) then(
                       freeSlice(hl)
-                      if(npc)then(
+                      if(selectedUnit == -1 && npc <> 0)then(
                         selectUnit(npc)
+                        updateCommandMenu()
                         playSound(5)
+                      )elseif(selectedUnit <> -1 && sliceCollidePoint(commandMenu,mousePixelX,mousePixelY)) then(
+                        selectedHudCommand := sliceUnderMouse
+                        selectCommandButton()
+                      )else(
+                          unselectUnit()
                         )
           ) elseif(rightClick) then(
               if(topMenu == false) then(
                   if(selectedUnit <> -1) then(
-                      unselectUnit()
+                      pathfindNpcTo(selectedUnit,mouseTileX,mouseTileY)
+                      mapcursor := loadWalkaboutSprite(14)
+                      putSprite(mapCursor, mouseTileX*20, mouseTileY*20)
+                      freeSlice(mapCursor)
+                      mapCursor := 0
                     )
                 )
-            )elseif(getSliceVisible(commandMenu) && sliceCollidePoint(commandMenu, mousePixelX, mousePixelY) ) then(
-              doCommandMenu(mousePixelX,mousePixelY)
-            )elseif(sliceCollidePoint(lookupSlice(sli:lifeStoryButton),mousePixelX,mousePixelY))then(
-#              lifeStoryWindow := loadSliceCollection(2)
+          )
 
+          if(getSliceVisible(commandMenu) && sliceCollidePoint(commandMenu, mousePixelX, mousePixelY) ) then(
+                if(cursor<>cursor:pick) then(setCursor(cursor:pick))
+
+                if(sliceUnderMouse<>0 && sliceIsSprite(sliceUnderMouse))then(
+                  if(sl<>0 && sliceUnderMouse<>sl)then(
+                    if(modulus(getSpriteFrame(sl),2) == 1)then(
+                      setSpriteFrame(sl, getSpriteFrame(sl)--1)
+                      )
+                    ) 
+                  sl := sliceUnderMouse
+                  if(modulus(getSpriteFrame(sl),2) == 0)then(
+                    setSpriteFrame(sl, getSpriteFrame(sl)+1)
+                    playSound(2)
+                    )
+                  )
+                if(leftClick)then(
+                  selectedHudCommand := getSliceLookup(sl)
+                  playSound(5)
+                  selectCommandButton()
+                  state := state:command
+                  )
+          ) elseif(sl<>0)then(setSpriteFrame(sl,getSpriteFrame(sl)--1),sl:=0
+             setCursor(cursor:pointer)
+          )
+        if(sliceCollidePoint(lookupSlice(sli:lifeStoryButton),mousePixelX,mousePixelY))then(
+#              lifeStoryWindow := loadSliceCollection(2)
+          ) 
+        zonesHere := zoneAtSpot(mouseTileX,mouseTileY,getCount)
+        showValue(zoneAtSpot(mouseTileX,mouseTileY))
+        if(zonesHere==1)then(
+          if(zoneAtSpot(mouseTileX,mouseTileY)>>100)then(
+            doBuilding(zoneAtSpot(mouseTileX,mouseTileY))
             )
+          )elseif(zonesHere>>1)then(
+          for(i,0,zonesHere,1)do(
+            if(zoneAtSpot(mouseTileX,mouseTileY,i)<<100)then(
+              doBuilding(zoneAtSpot(mouseTileX,mouseTileY,i))
+              break
+              )
+            ) 
+          )
         )
-      
       case(state:command) do(
           switch(selectedHudCommand) do(
         case(sli:iconMove) do(
@@ -423,8 +465,9 @@ script, mainLoop, begin
                     state := state:idle
                     )
                 )elseif(rightClick || escPressed) then(
-                  unselectUnit()
                   resetCommandButton()
+                  freeSlice(mapCursor)
+                  mapCursor := 0
                   state := state:idle
                 )
               )else(
@@ -494,15 +537,16 @@ script, mainLoop, begin
             )
           )
         case(sli:iconAttack) do(
-            if(getSpriteFrame(cursor) <> 3)then(setCursor(3))
+            setCursor(cursor:attack)
               if(leftClick)then(
                 if(npcAtPixel(mousePixelX,mousePixelY)==true)then(
                   setCursor(cursor:pointer)
                   selectedEnemy := npcAtPixel(mouseTileX*20, mouseTileY*20)
-                  wait(1)
                   if(getUnitStat(selectedUnit, unitData:directive) == command:patrol)then(
                     breakPatrol(selectedUnit)
                     )
+                  setUnitStat(selectedUnit,unitData:directive,command:attack)
+                  setUnitStat(selectedUnit,unitData:target,selectedEnemy)
                   npcChasesNpc(selectedUnit,selectedEnemy)
                   setParent(mapTarget,getNpcSlice(selectedEnemy))
                   state := state:idle 
@@ -526,6 +570,14 @@ script, mainLoop, begin
           state := state:idle
           )
         case(sli:iconPray) do(
+          #playSound()
+          #do animation
+          if(getUnitStat(selectedUnit,unitData:spirit)<<100)then(
+            setUnitStat(selectedUnit,unitData:spirit,getUnitStat(selectedUnit,unitData:spirit)+getUnitStat(selectedUnit,unitData:spirit)/10)
+            )
+          if(getunitStat(selectedUnit,unitData:spirit)>>100)then(setUnitStat(selectedUnit,unitData:spirit,100))
+            resetCommandButton()
+            state := state:idle
           )
         case(sli:iconRecruit) do(
           )
@@ -553,17 +605,19 @@ script, mainLoop, begin
         )#end switch selectedHudCommand
       )# end command case
     ) #end something??
-  setCursor(cursor:pointer)
+#  setCursor(cursor:pointer)
   doCameraScroll()
   resetInputs()
   wait(1)
   )  #end main loop
 end
 
-script, updateHud, npc, begin
+script, updateHud, npc=0, begin
     
     variable(txt, whichUnit)
-    whichUnit := getNpcSlice(npc)
+  
+
+  if(npc)then(  whichUnit := getNpcSlice(npc)
 
   # Name
     txt := lookupSlice(sli:unitName, hud)
@@ -572,7 +626,7 @@ script, updateHud, npc, begin
   
   # Class
     txt := lookupSlice(sli:unitClass, hud)
-    switch(getSliceExtra(firstTextChild(whichUnit),0)) do(
+    switch(getSliceExtra(whichUnit,0)) do(
       case(0) do($0="Civilian")
       case(1) do($0="Disciple")
       case(2) do($0="Friend")
@@ -586,825 +640,64 @@ script, updateHud, npc, begin
   # Health
     txt := lookupSlice(sli:unitHealth, hud)
     clearString(0)
-    appendNumber(0, getSliceExtra(firstTextChild(whichUnit),1))
+    appendNumber(0, getUnitStat(npc,unitData:curHp))
     setSliceText(txt, 0)
 
   # HealthMax
     txt := lookupSlice(sli:unitHealthMax, hud)
     clearString(0)
-    appendNumber(0, getSliceExtra(firstTextChild(whichUnit),2))
+    appendNumber(0, getUnitStat(npc,unitData:maxHp))
     setSliceText(txt,0)
     
    # Defense
    txt := lookupSlice(sli:unitDefense, hud)
    clearString(0)
-    appendNumber(0, getSliceExtra(firstTextChild(whichUnit),3))
+    appendNumber(0, getUnitStat(npc,unitData:defense))
     setSliceText(txt,0)
    
    # Strength
     txt := lookupSlice(sli:unitStrength, hud)
     clearString(0)
-    appendNumber(0, getSliceExtra(firstTextChild(whichUnit),4))
+    appendNumber(0, getUnitStat(npc,unitData:strength))
     setSliceText(txt,0)
    
    # Attack Speed
     txt := lookupSlice(sli:unitAttackSpeed, hud)
     clearString(0)
-    appendNumber(0, getSliceExtra(firstTextChild(whichUnit),5))
+    appendNumber(0, getUnitStat(npc,unitData:attackSpeed))
     setSliceText(txt,0)
    
    # Spirit
     txt := lookupSlice(sli:unitSpirit, hud)
     clearString(0)
-    appendNumber(0, getSliceExtra(firstTextChild(whichUnit),6))
+    appendNumber(0, getUnitStat(npc,unitData:spirit))
     setSliceText(txt,0)
-end
-
-
-
-
-plotscript, preTitle, begin
-variable(textOnScreen,moreText,shadowText,moreShadowText,thirdText,thirdShadowText )
-  fadeScreenOut
-  shadowText := createText
-  textOnScreen := createText
-  moreShadowText := createText
-  moreText := createText
-  thirdShadowText := createText
-  thirdText := createText
-  realignSlice(shadowText,edge:center,edge:middle,edge:center,edge:middle)
-  realignSlice(textOnScreen,edge:center,edge:middle,edge:center,edge:middle)
-  realignSlice(moreShadowText,edge:center,edge:middle,edge:center,edge:middle)
-  realignSlice(moreText,edge:center,edge:middle,edge:center,edge:middle)
-  realignSlice(thirdShadowText,edge:center,edge:middle,edge:center,edge:middle)
-  realignSlice(thirdText,edge:center,edge:middle,edge:center,edge:middle)
-  setTextColor(shadowText,96)
-  setTextColor(moreShadowText,96)
-  setTextColor(thirdShadowText,96)
-  setTextColor(textOnScreen,108)
-  setTextColor(moreText,74)
-  setOutline(textOnScreen,true)
-  setOutline(moreText,true)
-  setOutline(thirdText,true)
-  putSlice(textOnScreen,0,0)
-  putSlice(shadowText,2,3)
-  $0 = "Third Ear Games"
-  setSliceText(textOnScreen,0)
-  setSliceText(shadowText,0)
-  showBackdrop(2)
-  wait(1)
-  fadeScreenIn
-  wait(175)
-  fadeScreenOut
-  putSlice(textOnScreen,0,-12)
-  putSlice(shadowText,2,-9)
-  $0 = "in collaboration with"
-  setSliceText(textOnScreen,0)
-  setSliceText(shadowText,0)
-  putSlice(moreShadowText,2,3)
-  putSlice(moreText,0,0)
-  $0 = "Half Baked Media"
-  setSliceText(moreText,0)
-  setSliceText(moreShadowText,0)
-  $0 = "presents"
-  setSliceText(thirdText,0)
-  setSliceText(thirdShadowText,0)
-  putSlice(thirdText,0,13)
-  putSlice(thirdShadowText,2,16)
-  wait(36)
-  fadeScreenIn
-  wait(250)
-  fadeScreenOut
-  $0 = "A Ridiculous Game"
-  setSliceText(textOnScreen,0)
-  setSliceText(shadowText,0)
-  $0 = "powered by"
-  setSliceText(moreText,0)
-  setSliceText(moreShadowText,0)
-  $0 = "OHR RPG CE"
-  setSliceText(thirdText,0)
-  setSliceText(thirdShadowText,0)
-  wait(36)
-  fadeScreenIn
-  wait(250)
-  fadeScreenOut
-  freeSlice(textOnScreen)
-  freeSlice(shadowText)
-  freeSlice(moreText)
-  freeSlice(moreShadowText)
-  freeSlice(thirdText)
-  freeSlice(thirdShadowText)
-  preTitlePlayed := 1
-  wait(36)
-  resetInputs()
-  titleScreen()
-end
-
-script, getUnitStat, who, whichStat, begin
-  variable(unitSlice)
-  unitSlice := getNpcSlice(who)
-  return(getSliceExtra(firstTextChild(unitSlice),whichStat))
-end
-
-script, setUnitStat, who, whichStat, value, begin
-  variable(unitSlice)
-  unitSlice := getNpcSlice(who)
-  setSliceExtra(firstTextChild(unitSlice),whichStat,value)
-end
-# Input stuff for Eternal FOHRces
-
-plotscript, onKeypress, begin
-  if(keyIsPressed(key:esc)) then(
-      escPressed := true
     )
-  if(keyIsPressed(key:w) || keyIsPressed(key:up)) then(
-    panUp := true
-    )
-  if(keyIsPressed(key:s) || keyIsPressed(key:down)) then(
-    panDown := true
-    )
-  if(keyIsPressed(key:a) || keyIsPressed(key:left)) then(
-    panLeft := true
-    )
-  if(keyIsPressed(key:d) || keyIsPressed(key:right)) then(
-    panRight := true
-    )
-  if(mouseClick(leftButton)) then(
-    leftClick := true
-    )
-  if(mouseClick(rightButton)) then(
-    rightClick := true
-    )
-  if(keyval(key:shift) == 1) then(
-    shiftPressed := true
-    )
-end
-
-script, resetInputs, begin
-  leftClick := false
-  rightClick := false
-  lmbDown := false
-  rmbDown := false
-  panRight := false
-  panLeft := false
-  panUp := false
-  panDown := false
-  escPressed := false
-  shiftPressed := false
-end
-
-script, doMouse, begin
-  putSlice(cursor, mousePixelX, mousePixelY)
-end
-
-script, startMouse, begin
-  initMouse
-  cursor := loadWalkaboutSprite(4)
-  setParent(cursor, lookupSlice(sl:stringLayer))
-  sliceToFront(cursor)
-end
-
-script, doCameraScroll, begin
-  variable(spd)
-
-  if(shiftPressed) then(spd := 10)
-  else(spd := 5)
-
-  if(topMenu == false) then(
-      if(panLeft) then(
-          panCamera(left,1,spd)
-      )elseif(panRight) then(
-          panCamera(right,1,spd)
-      )elseif(panUp) then(
-          panCamera(up,1,spd)
-      )elseif(panDown) then(
-          panCamera(down,1,spd)
-      )
-    )
-  #resetInputs()
-end
-
-script, setCursor, whichCursor, begin
-  setSpriteFrame(cursor, whichCursor)
-end
-
-script, makeTileSelector, begin
-  variable(selector)
-  selector := loadWalkaboutSprite(12)
-  setSliceLookup(selector, sli:tileSelector)
-  setParent(selector, getNpcSlice(selectedUnit))
-  return(selector)
-end
-
-script, destroyTileSelector, begin
-  freeSlice(lookupSlice(sli:tileSelector))
-end
-
-# Slice at mouse detection script by tmc. Thanks man!
-script, topmostSliceAtPixel, parent, x, y, checkDescendants=true, visibleOnly=true, begin
-  variable (count)
-  count := sliceAtPixel(parent, x, y, getCount, checkDescendants, visibleOnly)
-  if (count > 0) then (
-  return (sliceAtPixel(parent, x, y, count -- 1, checkDescendants, visibleOnly))
-  )
-end
-
-script, selectUnit, unit, begin
-
-  if(lookupSlice(sli:tileSelector)) then(destroyTileSelector())
-  setSliceVisible(commandMenu, true)
- # if(selectedUnit == -1) then(
- #   playSound(1)
- #   ) #then
-  selectedUnit := unit
-  putSlice(makeTileSelector(),0,0)
-
-end
-
-script, unselectUnit, begin
-  selectedUnit := -1
-  if(lookupSlice(sli:tileSelector)) then(destroyTileSelector())
-  setSliceVisible(commandMenu, false)
-  playSound(6)
-  state := state:idle
-end
-
-script, selectCommandButton, begin
-  setSpritePalette(lookupSlice(selectedHudCommand), 6)
-end
-
-script, resetCommandButton, begin
-  setSpritePalette(lookupSlice(selectedHudCommand), getSpritePalette(lookupSlice(selectedHudCommand))--1)
-end
-
-
-# Script that makes new units
-script, createUnit, class, x, y, begin
-  variable(newUnitNPC)
-
-  #first make an NPC to be our unit and place it on the map
-  newUnitNPC := createGlobalNPC(npcIdCounter, x, y)
-
- # give our unit a unique appearance
- # replaceSprite(firstSpriteChild(getNpcSlice(newUnitNPC)), spritetype:walkabout, random(0,2), random(1,3))
-  alterNpc(newUnitNpc, npcStat:picture, random(0,2))
-  alterNpc(newUnitNpc, npcStat:palette, random(1,3))
-  alterNpc(newUnitNpc, npcStat:moveSpeed,1)
-  #hand off the NPC handle and class argument to the stat generation script
-  unitStatsGen(newUnitNPC, class)
-
-# increment the counter so every unit will have a unique ID
-  npcIdCounter += 1
-
-end
-
-# Script that makes a "stat sheet" slice and appends it to a given NPC
-script, unitStatsGen, unit, class, begin
-
-  variable(unitSetup, unitGenSex)
-# Create a text slice and store its handle in the unitSetup variable
-  unitSetup := createText
-
-# Make it invisible so everyone doesn't have a floating name
-  setSliceVisible(unitSetup, false)
-
-# Append the text slice to our NPC to give us somewhere to store a name and stats
-  setParent(unitSetup, getNpcSlice(unit))
-
-# Give us more extra data fields on the text slice to make it a proper stat sheet
-  setSliceLookup(unitSetup,sli:unitStats)
-  resizeExtra(unitSetup, 14)
-  setUnitClass(unitSetup, class)
-
-# Randomly assign history, age, sex, and marital status
-  setSliceExtra(unitSetup, 8, random(1,10))    # History
-  setSliceExtra(unitSetup, 9, random(1,3))      # Sex
-  setSliceExtra(unitSetup, 10, random(1,3))    # Marital
-  setSliceExtra(unitSetup, 11, random(18,60))  # Age
-
-# Generate a name in plotstring 1...
-  unitGenSex := getSliceExtra(unitSetup, 9)
-  switch(unitGenSex) do(
-    case(1) do(getFirstNameM())
-    case(2) do(getFirstNameF())
-    case(3) do(
-      switch(random(0,1)) do( 
-        case(0) do(getFirstNameM())
-        case(1) do(getFirstNameF())
-        )
-      )
-    case(else) do(showTextBox(1))
-    ) 
-  getLastName()
-
-  # ...and store it in the text slice
-  setSliceText(unitSetup, 1)
-end
-
-#So now we have basically a "stat sheet" stuck to an NPC. The stats in each slot are:
-#00 Class
-#01 HP Current
-#02 HP Maximum
-#03 Defense
-#04 Strength
-#05 Attack Speed
-#06 Spirit
-#07 Affiliation (1 neutral, 2 saved, 3 damned)
-#08 Backstory Index
-#09 Sex (1=M, 2=F, 3=X)
-#10 Marital Status (1=unmarried, 2=married, 3=living in sin, 4=sinning with hands)
-#11 Age (18-60)
-#12 Level (0-3)
-#13 Exp
-#14 Acting #0 is idle, 1 is walking, 2 is acting
-
-# Script to set up our stat sheet with actual numbers
-script, setUnitClass, unit, class=0, begin
-
-# Get the handle for the stat slice so we can do stuff to it
-  variable(unitData)
-  unitData := unit
-
-# Proceed setting stats according to the value of the argument "class"
-  switch(class) do(
     
-    case(unit:civilian) do(
-      setSliceExtra(unitData,0, 0) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 50)  # Spirit       
-      setSliceExtra(unitData,7, 0)   # Affiliation
-      )
-    case(unit:disciple) do(
-      setSliceExtra(unitData,0, 1) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 100)  # Spirit    
-      setSliceExtra(unitData,7, 1)   # Affiliation   
-      )
-    case(unit:friend) do(
-      setSliceExtra(unitData,0, 2) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 60)  # Spirit       
-      setSliceExtra(unitData,7, 0)   # Affiliation
-      ) 
-    case(unit:medic) do(
-      setSliceExtra(unitData,0, 3) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 60)  # Spirit      
-      setSliceExtra(unitData,7, 0)   # Affiliation 
-      )
-    case(unit:builder) do(
-      setSliceExtra(unitData,0, 4) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 60)  # Spirit      
-      setSliceExtra(unitData,7, 0)   # Affiliation 
-      )
-    case(unit:musician) do(
-      setSliceExtra(unitData,0, 5) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 60)  # Spirit      
-      setSliceExtra(unitData,7, 0)   # Affiliation 
-      )
-    case(unit:soldier) do(
-      setSliceExtra(unitData,0, 6) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 60)  # Spirit      
-      setSliceExtra(unitData,7, 0)   # Affiliation 
-      )
-    case(else) do(
-      setSliceExtra(unitData,0, 6) # Class        
-      setSliceExtra(unitData,1, 500)  # Health       
-      setSliceExtra(unitData,2, 500)  # HealthMax    
-      setSliceExtra(unitData,3, 20)  # Defense      
-      setSliceExtra(unitData,4, 20)  # Strength     
-      setSliceExtra(unitData,5, 20)  # Attack Speed 
-      setSliceExtra(unitData,6, 60)  # Spirit      
-      setSliceExtra(unitData,7, 0)   # Affiliation 
-      )
-    )
 
-end
-
-script, getFirstNameM, begin
-
-# Store a random first name in plotstring 1.
-  switch(random(1,26)) do(
-    case(1)  do ($1="Art ")
-    case(2)  do ($1="Bob ")
-    case(3)  do ($1="Chip ")
-    case(4)  do ($1="Dan ")
-    case(5)  do ($1="Ed ")
-    case(6)  do ($1="Fred ")
-    case(7)  do ($1="Greg ")
-    case(8)  do ($1="Harry ")
-    case(9)  do ($1="Ian ")
-    case(10) do ($1="Jeff ")
-    case(11) do ($1="Kyle ")
-    case(12) do ($1="Leo ")
-    case(13) do ($1="Mike ")
-    case(14) do ($1="Nate ")
-    case(15) do ($1="Oscar ")
-    case(16) do ($1="Pete ")
-    case(17) do ($1="Quentin ")
-    case(18) do ($1="Randy ")
-    case(19) do ($1="Simon ")
-    case(20) do ($1="Theo ")
-    case(21) do ($1="Umbert ")
-    case(22) do ($1="Victor ")
-    case(23) do ($1="William ")
-    case(24) do ($1="Xerxes ")
-    case(25) do ($1="Yakob ")
-    case(26) do ($1="Zed ")
-    case(else)do($1="Firstname ")
-    )
-
-end
-
-script, getFirstNameF, begin
-switch(random (27,52)) do(
-    case(27) do ($1="Ashley ")
-    case(28) do ($1="Bella ")
-    case(29) do ($1="Cheri ")
-    case(30) do ($1="Debbie ")
-    case(31) do ($1="Emily ")
-    case(32) do ($1="Fran ")
-    case(33) do ($1="Grace ")
-    case(34) do ($1="Hattie ")
-    case(35) do ($1="Iris ")
-    case(36) do ($1="Jane ")
-    case(37) do ($1="Karen ")
-    case(38) do ($1="Laurel ")
-    case(39) do ($1="Marge ")
-    case(40) do ($1="Noelle ")
-    case(41) do ($1="Olette ")
-    case(42) do ($1="Pamela ")
-    case(43) do ($1="Quille ")
-    case(44) do ($1="Renee ")
-    case(45) do ($1="Sarah ")
-    case(46) do ($1="Teri ")
-    case(47) do ($1="Urta ")
-    case(48) do ($1="Vanesa ")
-    case(49) do ($1="Wendy ")
-    case(50) do ($1="Xena ")
-    case(51) do ($1="Yanni ")
-    case(52) do ($1="Zoe ")
-    case(else)do($1="Firstname ")
-    ) 
-end 
- 
- script, getLastName, begin
-
-# Add a random last name to string 1.
-  switch(random(1,26)) do(
-    case(1)  do ($1+"Andre")
-    case(2)  do ($1+"Biles")
-    case(3)  do ($1+"Charles")
-    case(4)  do ($1+"Dorn")
-    case(5)  do ($1+"Eldar")
-    case(6)  do ($1+"Fikes")
-    case(7)  do ($1+"Gale")
-    case(8)  do ($1+"Hickman")
-    case(9)  do ($1+"Icke")
-    case(10) do ($1+"Jintov")
-    case(11) do ($1+"Kitarn")
-    case(12) do ($1+"Lipco")
-    case(13) do ($1+"McAdoo")
-    case(14) do ($1+"Nedry")
-    case(15) do ($1+"Oscar")
-    case(16) do ($1+"Peters")
-    case(17) do ($1+"Quinn")
-    case(18) do ($1+"Reagan")
-    case(19) do ($1+"Smith")
-    case(20) do ($1+"Tull")
-    case(21) do ($1+"Ulric")
-    case(22) do ($1+"Verl")
-    case(23) do ($1+"White")
-    case(24) do ($1+"Xian")
-    case(25) do ($1+"Yellman")
-    case(26) do ($1+"Zimmer")
-    case(else)do($1+"Last")
-  )
-end
-
-# Script that allows the creation of random units from a menu, for debug purposes
-plotscript, unitFromMenu, class, begin
-  
-  variable(diceX, diceY)
-  findRandomSpot()
-  createUnit(class, diceX, diceY) 
-
-  subscript, findRandomSpot, begin
-
-    diceX := random(0,mapWidth(currentMap))
-    diceY := random(0,mapHeight(currentMap))
-  
-    if(npcAtSpot(diceX, diceY)) then(
-      findRandomSpot()
-      )
-  end #subscript
-
-end
-
-# Backstories from the delightfully warped brainfolds of Mindfuzz
-script, getBackstory, index, begin
-  switch(index) do(
-    case(0)  do (
-      $2="There was an error"
-      setSliceText(sli:backstoryText,2)
-      )
-    case(1) do (
-      $2="Life Story: Hunter was born into a\n upper class family, and he wanted\n for nothing. He had a bit of an\n attitude and was always wearing\n the most stylish of polo shirts\n from Hippopostale. Despite his\n supple six pack, rippling\n shoulders, nubile hair, and \n succulent nose, he was empty\n inside, and all the cool frat\n parties in the world can't save\n you from the hot afterparty if \n you ain't cool with Christ.\n/nSalvation Story: One day after\nbinge drinking with his guy-hoes,\nHunter felt bad. Really bad. His\nhead was throbbing and he felt\nlike he could retch all over his\nMikey shoes. He swore then and\nthere that he would get right with\nGod and start going to church\nevery Sunday. He did, but the\nrapture happened and he was...\nLEFT BEHIND! But why? Because\njust going to church isn't good\nenough. His pastor didn't teach\nhim that until half the church\ndisappeared during a sermon and he\nwas like \"Oh yeah, um, kinda left\nsomething out here. I'll go grab\nthe book from the back and fix\nit.\" Twenty minutes later, Hunter\nrealized that Pastor Bob was not\ncoming back."
-      setSliceText(sli:backstoryText,2)
-      )
-    )
-end
-
-# Menu stuff for Eternal FOHRces
-
-script, doGameMenu, begin
-
-  variable(menuDebug,menuFullscreen,menuSfxVol,menuMusicVol,menuExit,menuQuitGame,menuSettings,menuReset,stopNoise, settingsMenu,menuSfxVolUp,menuSfxVolDown,menuMusicVolUp,menuMusicVolDown)
-
-  gameMenu := loadSliceCollection(7)
-  menuDebug := lookupSlice(sli:menuDebug, gameMenu)
-  menuSettings := lookupSlice(sli:menuSettings, gameMenu)
-  menuQuitGame := lookupSlice(sli:menuQuit, gameMenu)
-  menuReset := lookupSlice(sli:menuReset, gameMenu)
-  menuExit := lookupSlice(sli:menuExit,gameMenu)
-
-  #gameRunning := true
-  pauseGame := true
-  wait(30) # so the menu doesn't strobe
-  resetInputs()
-  while(true) do(
-    doMouse()
-      if(escPressed)then(
-      freeSlice(gameMenu)
-      wait(30)
-      pauseGame := false
-      exit
-      )elseif(sliceCollidePoint(lookupSlice(sli:menuDebug),mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuDebug), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuDebug), 240)
-        wait(5)
-        setTextColor(lastChild(menuDebug), 74)
-        wait(5)
-        setTextColor(lastChild(menuDebug), 240)
-        wait(5)
-        openMenu(3)            
-          ) #end if(leftClick)
-      )elseif(sliceCollidePoint(menuSettings,mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuSettings), 74)
-        if(leftClick)then(
-          playSound(4)
-          setTextColor(lastChild(menuSettings), 240)
-          wait(5)
-          setTextColor(lastChild(menuSettings), 74)
-          wait(5)
-          setTextColor(lastChild(menuSettings), 240)
-          wait(5)
-          resetInputs()
-          stopNoise :=0
-          while(true) do(
-            doMouse()
-            freeSlice(gameMenu)
-            settingsMenu := loadSliceCollection(6) 
-            menuFullscreen := lookupSlice(sli:menuFullscreen, settingsMenu)
-            menuSfxVol := lookupSlice(sli:menuSfxVol, settingsMenu)
-            menuSfxVolUp := lookupSlice(sli:menuSfxVolUp)
-            menuSfxVolDown:= lookupSlice(sli:menuSfxVolDown)
-            menuMusicVol := lookupSlice(sli:menuMusicVol, settingsMenu)
-            menuMusicVolUp := lookupSlice(menuMusicVolUp)
-            menuMusicVolDown := lookupSlice(menuMusicVolDown)
-            if(sliceCollidePoint(lookupSlice(sli:menuFullscreen),mousePixelX,mousePixelY))then(
-              if(stopNoise<>1)then(
-                playSound(2,false,true)
-                stopNoise := 1
-                )
-              setCursor(cursor:pick)
-              setTextColor(lastChild(menuFullscreen), 74)
-              if(leftClick)then(
-                playsound(4)
-                setTextColor(lastChild(menuFullscreen), 240)
-                wait(5)
-                setTextColor(lastChild(menuFullscreen), 74)
-                wait(5)
-                setTextColor(lastChild(menuFullscreen), 240)
-                wait(5)
-                )
-              )elseif(sliceCollidePoint(menuSfxVol,mousePixelX,mousePixelY))then(
-                if(stopNoise<>1)then(
-                  playSound(2,false,true)
-                  stopNoise := 1
-                  )
-                setCursor(cursor:pick)
-                setTextColor(lastChild(menuSfxVol), 74)
-                if(sliceCollidePoint(menuSfxVolUp,mousePixelX,mousePixelY))then(
-                    setTextColor(lookupSlice(sli:menuSfxVolUp), 74)
-                  )
-              )else(
-                stopNoise := 0
-                setCursor(cursor:pointer)
-              )
-            resetInputs()
-            wait(1)
-            ) #end while(true)
-          ) #end if(leftClick)
-      )elseif(sliceCollidePoint(menuReset,mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(playSound(2,false,true),stopNoise := 1)
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuReset), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuReset), 240)
-        wait(5)
-        setTextColor(lastChild(menuReset), 74)
-        wait(5)
-        setTextColor(lastChild(menuReset), 240)
-        wait(5)           
-          ) #end if(leftClick)
-      )elseif(sliceCollidePoint(menuExit,mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuExit), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuExit), 240)
-        wait(5)
-        setTextColor(lastChild(menuExit), 74)
-        wait(5)
-        setTextColor(lastChild(menuExit), 240)
-        wait(5)
-        resetGame            
-          ) #end if(leftClick)
-        )elseif(sliceCollidePoint(menuQuitGame,mousePixelX,mousePixelY))then(
-          if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuQuitGame), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuQuitGame), 240)
-        wait(5)
-        setTextColor(lastChild(menuQuitGame), 74)
-        wait(5)
-        setTextColor(lastChild(menuQuitGame), 240)
-        wait(5)
-        gameOver            
-          ) #end if(leftClick)
-        )else(stopNoise := 0
-        setTextColor(lastChild(menuDebug), 240)
-        setTextColor(lastChild(menuSettings), 240)
-        setTextColor(lastChild(menuReset), 240)
-        setTextColor(lastChild(menuExit), 240)
-        setTextColor(lastChild(menuQuitGame), 240)
-        setCursor(cursor:pointer)
-      ) #end main if/then/else
-      resetInputs()
-    wait(1)
-    ) #end Main Loop
-  pauseGame := false
-end
-
-
-plotscript, titleMenuPlay, begin
-  fadeScreenOut
-  showBackdrop(-1)
-  freeSlice(lookupSlice(sli:titleMenu))
-  bootstrap()
-end
-
-plotscript, menuContinue, begin
-  #This needs to be replaced with a Load menu.
-  #resetGame
-end
-
-plotscript, titleMenuQuit, begin
-  gameOver
-end
-
-plotscript, returnToTitle, begin
-  resetGame
-end
-
-script, initCommandMenu, begin
-  variable(col)
-  col := loadSliceCollection(4)
-  commandMenu := lookupSlice(sli:commandMenu, col)
-  setParent(commandMenu, hud)
-  hideCommandMenu()
-  freeSlice(col)
-end
-
-script, doCommandMenu, x, y, begin
-  variable(highlight, stopNoise)
-  setCursor(cursor:pick)
-  while(sliceCollidePoint(commandMenu,mousePixelX,mousePixelY))do(
-    doMouse()
-    if(topmostSliceAtPixel(commandMenu,mousePixelX,mousePixelY)<>sl)then(
-        if(sl<>0)then(
-          setSpriteFrame(sl, getSpriteFrame(sl)--1)
-          stopNoise := 0
-          )
-#        highlight := false
-        wait(1)
-        sl := topmostSliceAtPixel(commandMenu,mousePixelX,mousePixelY)
-#        if(highlight==false)then(
-          if(sl<>0)then(setSpriteFrame(sl, getSpriteFrame(sl)+1) )
-          if(stopNoise<>1)then(
-          playSound(2,false,true)
-          stopNoise := 1
-          )
-          highlight := true
-#        )
-      )
-    if(leftClick)then(
-      selectedHudCommand := getSliceLookup(sl)
-      playSound(5)
-      selectCommandButton()
-      state := state:command
-      break
-    )elseif(rightClick)then(
-      unselectUnit()
-      resetCommandButton()
-      break
-    )
-    doCameraScroll()
-    resetInputs()
-    wait(1)
-  ) # end while(true)
-  if(sl<>0)then(setSpriteFrame(sl, getSpriteFrame(sl)--1) )
-  sl := 0
-  highlight := false
-  stopNoise := 0
-  resetInputs()
-end
-
-script, hideCommandMenu, begin
-  setSliceVisible(commandMenu, false)
-end
-
-script, showCommandMenu, begin
-  setSliceVisible(commandMenu, true)
-end
-
-script, breakPatrol, who, begin
-  variable(i,j)
-  i := 0
-  j := 0
-  for(i,0,mapWidth--1,1)do(
-    for(j,0,mapHeight--1,1)do(
-      if(readZone(getUnitStat(who,unitData:target), i, j) == true) then(
-          writeZone(getUnitStat(who,unitData:target), i, j, false)
-      )
-    )
-  )
-  setNpcMoves(who, false)
-  alterNpc(who,npcStat:moveType,npcMoveType:standstill)
-  alterNpc(who,npcStat:defaultMovementZone,0)
-  setUnitStat(who,unitData:directive,command:idle)
+    # Player Spirit
+     txt := lookupSlice(sli:spirit, hud)
+     clearString(0)
+     appendNumber(0,getSliceExtra(playerStatSlice,pstat:spirit))
+     setSliceText(txt,0)
+    # Player Money
+     txt := lookupSlice(sli:money, hud)
+     clearString(0)
+     appendNumber(0,getSliceExtra(playerStatSlice,pstat:money))
+     setSliceText(txt,0)
+    # Player Housing
+     txt := lookupSlice(sli:housingCur, hud)
+     clearString(0)
+     appendNumber(0,getSliceExtra(playerStatSlice,pstat:housing))
+     setSliceText(txt,0)
+    # Player Housing Max
+     txt := lookupSlice(sli:housingMax, hud)
+     clearString(0)
+     appendNumber(0,getSliceExtra(playerStatSlice,pstat:housingMax))
+     setSliceText(txt,0)
+    # Player Food
+     txt := lookupSlice(sli:food, hud)
+     clearString(0)
+     appendNumber(0,getSliceExtra(playerStatSlice,pstat:food))
+     setSliceText(txt,0)
 end

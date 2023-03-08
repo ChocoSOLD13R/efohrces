@@ -1,0 +1,243 @@
+# New UnitGen script for efOHRces
+
+script, createUnit, x, y, class=1, begin
+	variable(newUnitNpc)
+
+#	First we make an NPC and place it on the map
+	newUnitNpc := createGlobalNpc(npcIdCounter, x, y)
+
+#	Give our unit a unique appearance
+	alterNpc(newUnitNpc, npcStat:picture, random(0,2))
+	alterNpc(newUnitNpc, npcStat:palette, random(1,3))
+	alterNpc(newUnitNpc, npcStat:moveSpeed,1)
+#	Hand off the NPC handle and class argument to the statgen script
+	unitStatsGen(newUnitNpc, class)
+
+# Increment the counter so every unit will have a unique NPC ID
+	npcIdCounter += 1
+end
+
+script, unitStatsGen, unit, class, begin
+	variable(unitName, unitSetup, unitGenSex)
+
+	unitSetup := getNpcSlice(unit)
+
+#	We used to use a text slice to hold data, it's here now to hold a randomly generated name but this too will eventually be phased out in favor of having a database of individual profiles.
+
+	unitName := createText
+	setSliceVisible(unitName, false)
+	setParent(unitName, unitSetup) 
+
+#	Expand the extra data slots on the NPC slice
+	resizeExtra(unitSetup, 14)
+#	Set up slots with stats depending on the unit's class
+	setUnitClass(unit, class)
+#	Assign unit initial affiliation
+	setUnitSide(unit)
+#	Randomly assign a history file. This should have checks in it to ensure that no backstory gets used twice.
+	setUnitStat(unit, unitData:backstory, random(1,100))
+#	Randomly generate a name and write it to the text slice we created. This should eventually be obsoleted when we make the backstory system
+	getFirstName()
+	getLastName()
+	setSliceText(unitName, 1)
+end
+
+script, setUnitSide, unit, begin
+	switch(getUnitStat(unit, unitData:spirit)/10) do(
+		case(0,1,2,3)do(
+			setUnitStat(unit, unitData:side, side:damned)
+			)
+		case(4,5)do(
+			setUnitStat(unit, unitData:side, side:neutral)
+			)
+		case(6,7,8,9) do(
+			setUnitStat(unit, unitData:side, side:saved)
+			)
+		)
+end
+
+script, setUnitClass, unit, class=0, begin
+	
+	switch(class) do(
+		case(unit:civilian) do(
+			setUnitStat(unit, unitData:class,0)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,50)			)
+
+		case(unit:disciple) do(
+			setUnitStat(unit, unitData:class,1)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,100)
+			)
+
+		case(unit:friend) do(
+			setUnitStat(unit, unitData:class,2)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,80)
+			)
+
+		case(unit:medic) do(
+			setUnitStat(unit, unitData:class,3)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,80)
+			)
+
+		case(unit:builder) do(
+			setUnitStat(unit, unitData:class,4)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,80)
+			)
+
+		case(unit:musician) do(
+			setUnitStat(unit, unitData:class,5)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,80)
+			)
+
+		case(unit:soldier) do(
+			setUnitStat(unit, unitData:class,6)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,80)
+			)
+
+		case(else) do(
+			setUnitStat(unit, unitData:class,7)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,0)
+			setUnitStat(unit, unitData:attackSpeed,1)
+			setUnitStat(unit, unitData:spirit,80)
+			)
+
+		)
+
+
+end
+
+#script, getUnitBackstory, who, begin
+#	switch(getUnitStat(who,unitData:backstory))do(
+#		case(1)do(
+#			)
+#
+#
+#		)
+#end
+
+script, getFirstName, begin
+	switch(random(1,52)) do(
+	    case(1)  do ($1="Art ")
+	    case(2)  do ($1="Bob ")
+	    case(3)  do ($1="Chip ")
+	    case(4)  do ($1="Dan ")
+	    case(5)  do ($1="Ed ")
+	    case(6)  do ($1="Fred ")
+	    case(7)  do ($1="Greg ")
+	    case(8)  do ($1="Harry ")
+	    case(9)  do ($1="Ian ")
+	    case(10) do ($1="Jeff ")
+	    case(11) do ($1="Kyle ")
+	    case(12) do ($1="Leo ")
+	    case(13) do ($1="Mike ")
+	    case(14) do ($1="Nate ")
+	    case(15) do ($1="Oscar ")
+	    case(16) do ($1="Pete ")
+	    case(17) do ($1="Quentin ")
+	    case(18) do ($1="Randy ")
+	    case(19) do ($1="Simon ")
+	    case(20) do ($1="Theo ")
+	    case(21) do ($1="Umbert ")
+	    case(22) do ($1="Victor ")
+	    case(23) do ($1="William ")
+	    case(24) do ($1="Xerxes ")
+	    case(25) do ($1="Yakob ")
+	    case(26) do ($1="Zed ")
+	    case(27) do ($1="Ashley ")
+	    case(28) do ($1="Bella ")
+	    case(29) do ($1="Cheri ")
+	    case(30) do ($1="Debbie ")
+	    case(31) do ($1="Emily ")
+	    case(32) do ($1="Fran ")
+	    case(33) do ($1="Grace ")
+	    case(34) do ($1="Hattie ")
+	    case(35) do ($1="Iris ")
+	    case(36) do ($1="Jane ")
+	    case(37) do ($1="Karen ")
+	    case(38) do ($1="Laurel ")
+	    case(39) do ($1="Marge ")
+	    case(40) do ($1="Noelle ")
+	    case(41) do ($1="Olette ")
+	    case(42) do ($1="Pamela ")
+	    case(43) do ($1="Quille ")
+	    case(44) do ($1="Renee ")
+	    case(45) do ($1="Sarah ")
+	    case(46) do ($1="Teri ")
+	    case(47) do ($1="Urta ")
+	    case(48) do ($1="Vanesa ")
+	    case(49) do ($1="Wendy ")
+	    case(50) do ($1="Xena ")
+	    case(51) do ($1="Yanni ")
+	    case(52) do ($1="Zoe ")
+	    case(else)do($1="Firstname ")
+    )
+end
+
+script, getLastName, begin
+	switch(random(1,26)) do(
+	    case(1)  do ($1+"Andre")
+	    case(2)  do ($1+"Biles")
+	    case(3)  do ($1+"Charles")
+	    case(4)  do ($1+"Dorn")
+	    case(5)  do ($1+"Eldar")
+	    case(6)  do ($1+"Fikes")
+	    case(7)  do ($1+"Gale")
+	    case(8)  do ($1+"Hickman")
+	    case(9)  do ($1+"Icke")
+	    case(10) do ($1+"Jintov")
+	    case(11) do ($1+"Kitarn")
+	    case(12) do ($1+"Lipco")
+	    case(13) do ($1+"McAdoo")
+	    case(14) do ($1+"Nedry")
+	    case(15) do ($1+"Oscar")
+	    case(16) do ($1+"Peters")
+	    case(17) do ($1+"Quinn")
+	    case(18) do ($1+"Reagan")
+	    case(19) do ($1+"Smith")
+	    case(20) do ($1+"Tull")
+	    case(21) do ($1+"Ulric")
+	    case(22) do ($1+"Verl")
+	    case(23) do ($1+"White")
+	    case(24) do ($1+"Xian")
+	    case(25) do ($1+"Yellman")
+	    case(26) do ($1+"Zimmer")
+	    case(else)do($1+"Last")
+	)
+end

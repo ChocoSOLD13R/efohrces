@@ -1,0 +1,82 @@
+#Buildings scripts for eFOHRces by ChocoSOLDIER
+
+script, doBuilding, whichBuilding, begin
+	#do highlight effect over entire zone - maptiles on a layer? rectangle slice with blending? idk we'll try things
+	#play mouseover sound
+	if(leftClick)then(
+		#play selection sound
+		#open a window with info + upgrades
+		loadSliceCollection(8)
+		#doBuildingWindow(whichBuilding)
+		)
+	if(rightclick)then(
+		#lol idk what should happen
+		)
+	else(
+		#idk stuff?
+		)
+end
+
+script, doBuildingWindow, begin
+	variable(col)
+	col := loadSliceCollection()
+	#update the info on the window in a manner similar to the HUD
+	#present upgrades depending on building type and level
+	switch(building:type)do(
+		case(btype:housing)do(
+			)
+		case(btype:financial)do(
+			)
+		case(btype:food)do(
+			)
+		case(btype:religious)do(
+			)
+
+		)
+
+end
+
+script, buildingGen, begin
+	variable(zoneHere,aText,doneWith,i,j)
+	for(i, 0, mapWidth--1,1)do(
+		for(j,0,mapHeight--1,1)do(
+			zoneHere := zoneAtSpot(i,j)
+			if(zoneHere<>0 && zoneHere<<100)then(
+				if(extraLength(getZone(zoneHere))==3)then(
+					aText := createText
+					resizeExtra(getZone(zoneHere),10)
+					switch(zoneHere/10)do(
+						case(0)do( #keep soft error from triggering when no zone
+							)
+						case(1,2)do( #Housing - zones 10-29
+							setBuildingStat(zoneHere,building:type,btype:housing)
+							)
+						case(3,4)do( #Financial - zones 30-49
+							)
+						case(5,6)do( #Food - zones 50-69(nice)
+							)
+						case(7,8)do( #Religious - zones 70-89
+							)
+						case(9)do(	#idk i thought maybe do something special?
+							)
+						case(else)do(
+							aText := createText
+							centerSlice(aText)
+							$0="Why?"
+							setSliceText(aText,0)
+							)
+						)
+					)
+				)
+			)
+		)
+end
+
+script, setBuildingStat, whichBuilding, whichStat, value, begin
+	setExtra(getZone(whichBuilding),whichstat,value)
+
+end
+
+script, getBuildingStat,whichBuilding, whichStat, begin
+	return(getExtra(getZone(whichBuilding),whichStat ))
+end

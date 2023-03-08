@@ -1,0 +1,169 @@
+# Variables and Constants for efOHRces by ChocoSOLDIER
+
+globalVariable(
+
+#shit to make scripts go
+	0,state
+	1,gameRunning
+  2,pauseGame
+  3,preTitlePlayed
+
+# Slices and slice collections
+	100,hud
+  101,titleText
+  102,commandMenu
+  104,gameMenu
+  105,scenarioMenu
+  106,lifeStoryWindow
+
+  110,sl
+  111,hlBtn
+  112,sliceUnderMouse
+
+# Input
+	200,cursor       # technically a slice. sue me
+	201,leftClick
+	202,rightClick
+	203,lmbDown
+	204,rmbDown
+  205,mouseTileX
+  206,mouseTileY
+  207,panRight
+  208,panLeft
+  209,panUp
+  210,panDown
+  211,escPressed
+  212,shiftPressed
+
+# Reserved
+  216,nicolaiCarpathia #In the books this was the antichrist's personal number, 6*6*6
+
+# Selection
+	220,selectedHudCommand
+  221,selectedUnit
+	222,selectedEnemy
+
+  230,unitClass
+  231,unitHp
+  232,unitHpMax
+  233,unitDef
+  234,unitStr
+  235,unitAtk
+  236,unitSp
+  237,unitSide
+  238,unitBackstory
+  239,unitSex
+  240,unitMarital
+  241,unitAge
+  242,unitLevel
+  243,unitExperience
+
+# Player Stats
+  300,playerStatSlice
+  301,playerSpirit
+  302,playerMoney
+  303,playerHousing
+  304,playerHousingMax
+  305,playerFood
+
+# Utility
+  800,stopNoise
+# Counters
+  999, npcIdCounter
+)
+
+defineConstant(
+
+#Player Stats
+#these are names for the "extra data" slots where we store player stats
+0,pstat:spirit
+1,pstat:money
+2,pstat:housing
+3,pstat:housingMax
+4,pstat:food
+
+#Building Stats
+# These are names for the "extra data" slots where we store building stats
+0,building:type
+1,building:level
+2,building:health
+
+#Building Types
+0,btype:housing
+1,btype:financial
+2,btype:food
+3,btype:religious
+
+# Unit Stats and Other Data
+# These are names for the "extra data" slots where we store our units' stats
+0,unitData:class
+1,unitData:curHp
+2,unitData:maxHp
+3,unitData:defense
+4,unitData:strength
+5,unitData:attackSpeed
+6,unitData:spirit
+7,unitData:side
+8,unitData:backstory
+9,unitData:level
+10,unitData:exp
+11,unitData:state
+12,unitData:directive 
+13,unitData:target
+14,unitData:attackCounter
+
+# Unit Classes - values for unitData:class
+0,unit:civilian
+1,unit:disciple
+2,unit:friend
+3,unit:medic
+4,unit:builder
+5,unit:musician
+6,unit:soldier
+
+# Unit Affiliations - values for unitData:side
+0,side:neutral
+1,side:saved
+2,side:damned
+ 
+# Unit states - values for unitdata:state
+0,unitState:idle
+1,unitState:walking
+2,unitState:patrol
+3,unitState:attacking
+4,unitState:defending
+5,unitState:healing
+6,unitState:building
+7,unitState:following
+
+# Unit commands - values for unitData:directive
+# This is to resolve unit ADD and help them remember what to do when they're done walking
+0,command:idle
+1,command:patrol
+2,command:attack
+3,command:pray
+4,command:recruit
+5,command:acquire
+6,command:build
+7,command:preach
+8,command:convert
+9,command:rally
+10,command:survey
+12,command:sing
+
+# Mouse Cursors
+0,cursor:pointer
+1,cursor:pick
+2,cursor:no
+3,cursor:attack
+4,cursor:build
+5,cursor:survey
+6,cursor:renameMe
+7,cursor:renameMe2
+
+
+# states for main loop
+0,state:idle
+1,state:command
+2,state:target
+)

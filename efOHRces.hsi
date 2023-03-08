@@ -1,0 +1,115 @@
+# HamsterSpeak constant definitions for efOHRces.rpg
+
+define constant, begin
+0,song:Aenima
+1,song:Judith4
+1,sfx:selectjoyfulnoise_f_singer
+2,sfx:Thip
+3,sfx:Menu8Bit
+4,sfx:Collision8Bit
+5,sfx:Confirm8Bit
+6,sfx:Cancel8Bit
+7,sfx:Everybodys_gone_fartin_Fartin_
+0,stat:HP
+1,stat:MP
+2,stat:ST
+3,stat:Aim
+4,stat:DF
+5,stat:Dodge
+6,stat:Magic
+7,stat:Will
+8,stat:Speed
+9,stat:SP
+10,stat:MP~
+11,stat:AS
+0,element:Fire
+1,element:Ice
+2,element:Lit
+3,element:Earth
+4,element:Other
+5,element:Other 2
+6,element:Other 3
+7,element:Other 4
+8,element:Other 5
+9,element:Other 6
+10,element:Other 7
+11,element:Other 8
+12,element:Other 9
+13,element:Other 10
+14,element:Other 11
+15,element:Other 12
+1,slot:Weapon
+2,slot:Head
+3,slot:Body
+4,slot:Arms
+5,slot:Legs
+1,menu:Title
+2,menu:Settings
+3,menu:Unit Select
+1,sli:spirit
+2,sli:money
+3,sli:housingCur
+4,sli:housingMax
+5,sli:food
+6,sli:unitName
+7,sli:unitPortrait
+8,sli:unitHealth
+9,sli:unitDefense
+10,sli:unitStrength
+11,sli:unitAttackSpeed
+12,sli:unitSpirit
+13,sli:unitHealthMax
+14,sli:iconCommand
+15,sli:iconMenu
+16,sli:building
+17,sli:terrain
+18,sli:unitStats
+19,sli:unitHealthBar
+20,sli:iconMove
+21,sli:iconPatrol
+22,sli:iconAttack
+23,sli:iconStop
+24,sli:iconPray
+25,sli:iconRecruit
+26,sli:iconRecruit2
+27,sli:iconRecruit3
+28,sli:iconAcquire
+29,sli:iconBuild
+30,sli:iconPreach
+31,sli:iconConvert
+32,sli:iconRally
+33,sli:iconSurvey
+34,sli:iconFollow
+35,sli:iconAuto
+36,sli:iconSing
+37,sli:icon
+38,sli:icon 2
+39,sli:unitClass
+40,sli:backstoryAge
+41,sli:backstorySex
+42,sli:backstoryMaritalStatus
+43,sli:backstoryText
+44,sli:backstoryName
+45,sli:commandMenu
+46,sli:unitStatsHud
+47,sli:tileSelector
+48,sli:titleMenu
+49,sli:titleMenuPlay
+50,sli:titleMenuContinue
+51,sli:titleMenuExit
+52,sli:titleEasterEgg
+53,sli:menuDebug
+54,sli:menuSfxVol
+55,sli:menuMusicVol
+56,sli:menuExit
+57,sli:menuFullscreen
+58,sli:menuQuit
+59,sli:lifeStoryButton
+60,sli:menuReset
+61,sli:menuSettings
+62,sli:menuGoBack
+63,sli:menuSfxVolUp
+64,sli:menuSfxVolDown
+65,sli:menuMusicVolUp
+66,sli:menuMusicVolDown
+end

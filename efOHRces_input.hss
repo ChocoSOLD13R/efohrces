@@ -1,0 +1,97 @@
+# Input stuff for efOHRces by ChocoSOLDIER
+
+plotscript, onKeypress, begin
+  if(keyIsPressed(key:esc)) then(
+      escPressed := true
+    )
+  if(keyIsPressed(key:w) || keyIsPressed(key:up)) then(
+    panUp := true
+    )
+  if(keyIsPressed(key:s) || keyIsPressed(key:down)) then(
+    panDown := true
+    )
+  if(keyIsPressed(key:a) || keyIsPressed(key:left)) then(
+    panLeft := true
+    )
+  if(keyIsPressed(key:d) || keyIsPressed(key:right)) then(
+    panRight := true
+    )
+  if(mouseClick(leftButton)) then(
+    leftClick := true
+    )
+  if(mouseClick(rightButton)) then(
+    rightClick := true
+    )
+  if(keyval(key:shift) == 1) then(
+    shiftPressed := true
+    )
+end
+
+script, resetInputs, begin
+  leftClick := false
+  rightClick := false
+  lmbDown := false
+  rmbDown := false
+  panRight := false
+  panLeft := false
+  panUp := false
+  panDown := false
+  escPressed := false
+  shiftPressed := false
+end
+
+script, doMouse, begin
+  putSlice(cursor, mousePixelX, mousePixelY)
+end
+
+script, startMouse, begin
+  initMouse
+  cursor := loadWalkaboutSprite(4)
+  setParent(cursor, lookupSlice(sl:stringLayer))
+  sliceToFront(cursor)
+end
+
+script, doCameraScroll, begin
+  variable(spd)
+
+  if(shiftPressed) then(spd := 10)
+  else(spd := 5)
+
+  if(topMenu == false) then(
+      if(panLeft) then(
+          panCamera(left,1,spd)
+      )elseif(panRight) then(
+          panCamera(right,1,spd)
+      )elseif(panUp) then(
+          panCamera(up,1,spd)
+      )elseif(panDown) then(
+          panCamera(down,1,spd)
+      )
+    )
+  #resetInputs()
+end
+
+script, setCursor, whichCursor, begin
+  setSpriteFrame(cursor, whichCursor)
+end
+
+script, makeTileSelector, begin
+  variable(selector)
+  selector := loadWalkaboutSprite(12)
+  setSliceLookup(selector, sli:tileSelector)
+  setParent(selector, getNpcSlice(selectedUnit))
+  return(selector)
+end
+
+script, destroyTileSelector, begin
+  freeSlice(lookupSlice(sli:tileSelector))
+end
+
+script, topmostSliceAtPixel, parent, x, y, checkDescendants=true, visibleOnly=true, begin
+  variable (count)
+  count := sliceAtPixel(parent, x, y, getCount, checkDescendants, visibleOnly)
+  if (count > 0) then (
+  return (sliceAtPixel(parent, x, y, count -- 1, checkDescendants, visibleOnly))
+  )
+end
+
