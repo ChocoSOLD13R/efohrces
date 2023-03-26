@@ -1,6 +1,13 @@
 # HamsterSpeak constant definitions for efOHRces.rpg
 
 define constant, begin
+2,tag:BobMaga
+3,tag:BobTheHamster
+4,tag:KyleKitatain
+5,tag:HatiLunaris
+6,tag:SantaClaus
+7,tag:TimTim
+8,tag:Frumpy
 0,song:Aenima
 1,song:Judith4
 1,sfx:selectjoyfulnoise_f_singer
@@ -10,6 +17,9 @@ define constant, begin
 5,sfx:Confirm8Bit
 6,sfx:Cancel8Bit
 7,sfx:Everybodys_gone_fartin_Fartin_
+8,sfx:Crush8Bit
+9,sfx:Slash8Bit
+10,sfx:Powerup
 0,stat:HP
 1,stat:MP
 2,stat:ST
@@ -82,8 +92,8 @@ define constant, begin
 34,sli:iconFollow
 35,sli:iconAuto
 36,sli:iconSing
-37,sli:icon
-38,sli:icon 2
+37,sli:iconHeal
+38,sli:icon
 39,sli:unitClass
 40,sli:backstoryAge
 41,sli:backstorySex
@@ -112,4 +122,51 @@ define constant, begin
 64,sli:menuSfxVolDown
 65,sli:menuMusicVolUp
 66,sli:menuMusicVolDown
+67,sli:bWinType
+68,sli:bWinLevel
+69,sli:bWinOutput
+70,sli:bWinUpgradeCost
+71,sli:bWinTitle
+72,sli:bWinTitleShadow
+73,sli:bWinUpgradeCostShadow
+74,sli:bWinOutputShadow
+75,sli:bWinLevelShadow
+76,sli:bWinTypeShadow
+77,sli:bWinButtonUpgrade
+78,sli:bWinButtonDone
+79,sli:backstoryAgeShadow
+80,sli:backstorySexShadow
+81,sli:backstoryMaritalStatusShadow
+82,sli:backstoryNameShadow
+83,sli:backstoryWindowButtonDone
+84,sli:bWinBtnScrollUp
+85,sli:bWinBtnScrollDown
+86,sli:bWinScrollUp
+87,sli:bWinScrollDown
+88,sli:bWinFlavorText
+89,sli:prayBubble
+90,sli:unitLevel
+91,sli:buildingSlice
+92,sli:minimapCursor
+93,sli:unitMiniHpBar
+94,sli:unitMiniSpiritBar
+95,sli:unitMiniStatBars
+96,sli:scenarioPlayButton
+97,sli:scenarioSettingsButton
+98,sli:scenarioQuitButton
+99,sli:scenarioImage
+100,sli:scenarioThumbnail
+101,sli:scenarioTitleShadow
+102,sli:scenarioCard
+103,sli:scenarioTitle
+104,sli:scenarioDescription
+105,sli:convertBubble
+106,sli:cooldownMeter1
+107,sli:cooldownMeter4
+108,sli:coolDownMeter3
+109,sli:cooldownMeter2
+110,sli:cooldownOverlay
+111,sli:bWinPurchasePriceShadow
+112,sli:bWinUpgrade
+113,sli:preachBubble
 end

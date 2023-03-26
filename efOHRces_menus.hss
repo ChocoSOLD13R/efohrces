@@ -1,288 +1,414 @@
-# menu stuff for efOHRces by ChocoSOLDIER
+# Menu scripts for efOHRces by ChocoSOLDIER
 
 script, selectCommandButton, begin
-  setSpritePalette(sl, 6)
+	setSpritePalette(sl, 6)
 end
 
 script, resetCommandButton, begin
-  setSpritePalette(sl, getSpritePalette(sl)--1)
+	setSpritePalette(sl, getSpritePalette(sl)--1)
 end
 
 script, doGameMenu, begin
 
-  variable(menuDebug,menuFullscreen,menuSfxVol,menuMusicVol,menuExit,menuQuitGame,menuSettings,menuReset, settingsMenu,menuSfxVolUp,menuSfxVolDown,menuMusicVolUp,menuMusicVolDown,menuGoBack)
+	variable(
+		menuDebug
+		menuFullscreen
+		menuSfxVol
+		menuMusicVol
+		menuExit
+		menuQuitGame
+		menuSettings
+		menuReset
+		settingsMenu
+		menuSfxVolUp
+		menuSfxVolDown
+		menuMusicVolUp
+		menuMusicVolDown
+		menuGoBack
+		timeout
+		hoverBtn)
 
-  gameMenu := loadSliceCollection(7)
-  menuDebug := lookupSlice(sli:menuDebug, gameMenu)
-  menuSettings := lookupSlice(sli:menuSettings, gameMenu)
-  menuQuitGame := lookupSlice(sli:menuQuit, gameMenu)
-  menuReset := lookupSlice(sli:menuReset, gameMenu)
-  menuExit := lookupSlice(sli:menuExit,gameMenu)
+	gameMenu := loadSliceCollection(7)
+	menuDebug := lookupSlice(sli:menuDebug, gameMenu)
+	menuSettings := lookupSlice(sli:menuSettings, gameMenu)
+	menuQuitGame := lookupSlice(sli:menuQuit, gameMenu)
+	menuReset := lookupSlice(sli:menuReset, gameMenu)
+	menuExit := lookupSlice(sli:menuExit,gameMenu)
 
-  #gameRunning := true
-  pauseGame := true
-  wait(30) # so the menu doesn't strobe
-  resetInputs()
-  while(true) do(
-    doMouse()
-      if(escPressed)then(
-      freeSlice(gameMenu)
-      wait(30)
-      pauseGame := false
-      exit
-      )elseif(sliceCollidePoint(lookupSlice(sli:menuDebug),mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuDebug), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuDebug), 240)
-        wait(5)
-        setTextColor(lastChild(menuDebug), 74)
-        wait(5)
-        setTextColor(lastChild(menuDebug), 240)
-        wait(5)
-        openMenu(3)            
-          ) #end if(leftClick)
-      )elseif(sliceCollidePoint(menuSettings,mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuSettings), 74)
-        if(leftClick)then(
-          playSound(4)
-          setTextColor(lastChild(menuSettings), 240)
-          wait(5)
-          setTextColor(lastChild(menuSettings), 74)
-          wait(5)
-          setTextColor(lastChild(menuSettings), 240)
-          wait(5)
-          settingsMenu := loadSliceCollection(6)
-          resetInputs()
-          stopNoise :=0
-          while(settingsMenu) do(
-            doMouse()
-            menuFullscreen := lookupSlice(sli:menuFullscreen, settingsMenu)
-            menuSfxVol := lookupSlice(sli:menuSfxVol, settingsMenu)
-            menuSfxVolUp := lookupSlice(sli:menuSfxVolUp)
-            menuSfxVolDown:= lookupSlice(sli:menuSfxVolDown)
-            menuMusicVol := lookupSlice(sli:menuMusicVol, settingsMenu)
-            menuMusicVolUp := lookupSlice(sli:menuMusicVolUp)
-            menuMusicVolDown := lookupSlice(sli:menuMusicVolDown)
-            menuGoBack := lookupSlice(sli:menuGoBack)
-            if(sliceCollidePoint(lookupSlice(sli:menuFullscreen),mousePixelX,mousePixelY))then(
-              if(stopNoise<>1)then(
-                playSound(2,false,true)
-                stopNoise := 1
-                )
-              setCursor(cursor:pick)
-              setTextColor(lastChild(menuFullscreen), 74)
-              if(leftClick)then(
-                playsound(4)
-                setTextColor(lastChild(menuFullscreen), 240)
-                wait(5)
-                setTextColor(lastChild(menuFullscreen), 74)
-                wait(5)
-                setTextColor(lastChild(menuFullscreen), 240)
-                wait(5)
-                )
-              )elseif(sliceCollidePoint(menuSfxVol,mousePixelX,mousePixelY))then(
-                if(stopNoise<>1)then(
-                  playSound(2,false,true)
-                  stopNoise := 1
-                  )
-                setCursor(cursor:pick)
-                setTextColor(lastChild(menuSfxVol), 74)
-                if(leftClick)then(setGlobalSoundVolume(getGlobalSoundVolume+15),playSound(5))
-                if(rightClick)then(setGlobalSoundVolume(getGlobalSoundVolume--15),playSound(5))
-              )elseif(sliceCollidePoint(menuMusicVol,mousePixelX,mousePixelY))then(
-                if(stopNoise<>1)then(
-                  playSound(2)
-                  stopNoise := 1
-                  )
-                setCursor(cursor:pick)
-                setTextColor(lastChild(menuMusicVol), 74)
-                if(leftClick)then(setMusicVolume(getMusicVolume+15),playSound(5))
-                if(rightClick)then(setMusicVolume(getMusicVolume--15),playSound(5))
-              )elseif(sliceCollidePoint(menuGoBack,mousePixelX,mousePixelY))then(
-                  if(stopNoise == 0)then(
-                      playSound(2)
-                      stopNoise :=1
-                    )
-                  setCursor(cursor:pick)
-                  setTextColor(lastChild(menuGoBack), 74)
-                  if(leftClick)then(
-                    freeSlice(settingsMenu)
-                    break
-                  )
-              )else(
-                stopNoise := 0
-                setCursor(cursor:pointer)
-                setTextColor(lastChild(menuFullscreen),240)
-                setTextColor(lastChild(menuSfxVol),240)
-                setTextColor(lastChild(menuMusicVol),240)
-                setTextColor(lastChild(menuGoBack),240)
-              )
-            resetInputs()
-            wait(1)
-            ) #end while(true)
-          ) #end if(leftClick)
-      )elseif(sliceCollidePoint(menuReset,mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(playSound(2,false,true),stopNoise := 1)
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuReset), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuReset), 240)
-        wait(5)
-        setTextColor(lastChild(menuReset), 74)
-        wait(5)
-        setTextColor(lastChild(menuReset), 240)
-        wait(5)           
-          ) #end if(leftClick)
-      )elseif(sliceCollidePoint(menuExit,mousePixelX,mousePixelY))then(
-        if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuExit), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuExit), 240)
-        wait(5)
-        setTextColor(lastChild(menuExit), 74)
-        wait(5)
-        setTextColor(lastChild(menuExit), 240)
-        wait(5)
-        resetGame            
-          ) #end if(leftClick)
-        )elseif(sliceCollidePoint(menuQuitGame,mousePixelX,mousePixelY))then(
-          if(stopNoise<>1)then(
-        playSound(2,false,true)
-          stopNoise := 1
-          )
-        setCursor(cursor:pick)
-        setTextColor(lastChild(menuQuitGame), 74)
-        if(leftClick)then(
-            playSound(4)
-        setTextColor(lastChild(menuQuitGame), 240)
-        wait(5)
-        setTextColor(lastChild(menuQuitGame), 74)
-        wait(5)
-        setTextColor(lastChild(menuQuitGame), 240)
-        wait(5)
-        gameOver            
-          ) #end if(leftClick)
-        )else(stopNoise := 0
-        setTextColor(lastChild(menuDebug), 240)
-        setTextColor(lastChild(menuSettings), 240)
-        setTextColor(lastChild(menuReset), 240)
-        setTextColor(lastChild(menuExit), 240)
-        setTextColor(lastChild(menuQuitGame), 240)
-        setCursor(cursor:pointer)
-      ) #end main if/then/else
-      resetInputs()
-    wait(1)
-    ) #end Main Loop
-  pauseGame := false
+	#gameRunning := true
+	setTimer(0,10,1)
+	#resetInputs()
+	pauseGame := true
+	while(1)do(
+		doMouse()
+	
+			if(escPressed && readtimer(0)<<0)then(
+			freeSlice(gameMenu)
+			pauseGame := false
+			setTimer(0,10,1)
+			exit
+			)elseif(sliceCollidePoint(menuDebug,mousePixelX,mousePixelY))then(
+				if(hoverBtn<>menuDebug)then(
+					playSound(2,false,true)
+					hoverBtn := menuDebug
+					setTextColor(lastChild(menuSettings),240)
+					setTextColor(lastChild(menuReset),240)
+					setTextColor(lastChild(menuQuitGame),240)
+					setTextColor(lastChild(menuExit),240)
+					)
+				setCursor(cursor:pick)
+				setTextColor(lastChild(menuDebug), 74)
+				if(leftClick)then(
+						playSound(4)
+				setTextColor(lastChild(menuDebug), 240)
+				wait(5)
+				setTextColor(lastChild(menuDebug), 74)
+				wait(5)
+				setTextColor(lastChild(menuDebug), 240)
+				wait(5)
+				openMenu(3)            
+					) #end if(leftClick)
+			)elseif(sliceCollidePoint(menuSettings,mousePixelX,mousePixelY))then(
+				if(hoverBtn<>menuSettings)then(
+					playSound(2,false,true)
+					hoverBtn := menuSettings
+					setTextColor(lastChild(menuDebug),240)
+					setTextColor(lastChild(menuReset),240)
+					setTextColor(lastChild(menuQuitGame),240)
+					setTextColor(lastChild(menuExit),240)
+					)
+				setCursor(cursor:pick)
+				setTextColor(lastChild(menuSettings), 74)
+				if(leftClick)then(
+					playSound(4)
+					setTextColor(lastChild(menuSettings), 240)
+					wait(5)
+					setTextColor(lastChild(menuSettings), 74)
+					wait(5)
+					setTextColor(lastChild(menuSettings), 240)
+					wait(5)
+					settingsMenu := loadSliceCollection(6)
+					resetInputs()
+					while(settingsMenu) do(
+						doMouse()
+						menuFullscreen := lookupSlice(sli:menuFullscreen, settingsMenu)
+						menuSfxVol := lookupSlice(sli:menuSfxVol, settingsMenu)
+						menuSfxVolUp := lookupSlice(sli:menuSfxVolUp)
+						menuSfxVolDown:= lookupSlice(sli:menuSfxVolDown)
+						menuMusicVol := lookupSlice(sli:menuMusicVol, settingsMenu)
+						menuMusicVolUp := lookupSlice(sli:menuMusicVolUp)
+						menuMusicVolDown := lookupSlice(sli:menuMusicVolDown)
+						menuGoBack := lookupSlice(sli:menuGoBack)
+						if(keyIsPressed(key:esc))then(
+							freeSlice(settingsMenu)
+							setTimer(0,10,1)
+							break
+							)elseif(sliceCollidePoint(menuFullscreen,mousePixelX,mousePixelY))then(
+								if(hoverBtn<>menuFullscreen)then(
+									playSound(2,false,true)
+									hoverBtn := menuFullscreen
+									setTextColor(lastChild(menuSfxVol),240)
+									setTextColor(lastChild(menuMusicVol),240)
+									setTextColor(lastChild(menugoBack),240)
+									)
+								setCursor(cursor:pick)
+								setTextColor(lastChild(menuFullscreen), 74)
+								if(leftClick)then(
+									playsound(4)
+									setTextColor(lastChild(menuFullscreen), 240)
+									wait(5)
+									setTextColor(lastChild(menuFullscreen), 74)
+									wait(5)
+									setTextColor(lastChild(menuFullscreen), 240)
+									wait(5)
+									)
+							)elseif(sliceCollidePoint(menuSfxVol,mousePixelX,mousePixelY))then(
+								if(hoverBtn<>menuSfxVol)then(
+									playSound(2,false,true)
+									hoverBtn := menuSfxVol
+									setTextColor(lastChild(menuFullscreen),240)
+									setTextColor(lastChild(menuMusicVol),240)
+									setTextColor(lastChild(menugoBack),240)
+									)
+								setCursor(cursor:pick)
+								setTextColor(lastChild(menuSfxVol), 74)
+								if(leftClick)then(setGlobalSoundVolume(getGlobalSoundVolume+15),playSound(5))
+								if(rightClick)then(setGlobalSoundVolume(getGlobalSoundVolume--15),playSound(5))
+							)elseif(sliceCollidePoint(menuMusicVol,mousePixelX,mousePixelY))then(
+								if(hoverBtn<>menuMusicVol)then(
+									playSound(2,false,true)
+									hoverBtn := menuMusicVol
+									setTextColor(lastChild(menuFullscreen),240)
+									setTextColor(lastChild(menuSfxVol),240)
+									setTextColor(lastChild(menuGoBack),240)
+									)
+								setCursor(cursor:pick)
+								setTextColor(lastChild(menuMusicVol), 74)
+								if(leftClick)then(setMusicVolume(getMusicVolume+15),playSound(5))
+								if(rightClick)then(setMusicVolume(getMusicVolume--15),playSound(5))
+							)elseif(sliceCollidePoint(menuGoBack,mousePixelX,mousePixelY))then(
+									if(hoverBtn<>menuGoBack)then(
+										playSound(2,false,true)
+										hoverBtn := menuGoBack
+										setTextColor(lastChild(menuFullscreen),240)
+										setTextColor(lastChild(menuMusicVol),240)
+										setTextColor(lastChild(menuSfxVol),240)
+										)
+									setCursor(cursor:pick)
+									setTextColor(lastChild(menuGoBack), 74)
+									if(leftClick)then(
+										playsound(4)
+										setTextColor(lastChild(menuGoBack), 240)
+										wait(5)
+										setTextColor(lastChild(menuGoBack), 74)
+										wait(5)
+										setTextColor(lastChild(menuGoBack), 240)
+										wait(5)
+										freeSlice(settingsMenu)
+										break
+									)
+							)else(
+								setCursor(cursor:pointer)
+								setTextColor(lastChild(menuFullscreen),240)
+								setTextColor(lastChild(menuSfxVol),240)
+								setTextColor(lastChild(menuMusicVol),240)
+								setTextColor(lastChild(menuGoBack),240)
+							)
+						resetInputs()
+						wait(1)
+						) #end while(true)
+					) #end if(leftClick)
+			)elseif(sliceCollidePoint(menuReset,mousePixelX,mousePixelY))then(
+				if(hoverBtn<>menuReset)then(
+					playSound(2,false,true)
+					hoverBtn := menuReset
+					setTextColor(lastChild(menuSettings),240)
+					setTextColor(lastChild(menuDebug),240)
+					setTextColor(lastChild(menuQuitGame),240)
+					setTextColor(lastChild(menuExit),240)
+					)
+				setCursor(cursor:pick)
+				setTextColor(lastChild(menuReset), 74)
+				if(leftClick)then(
+						playSound(4)
+				setTextColor(lastChild(menuReset), 240)
+				wait(5)
+				setTextColor(lastChild(menuReset), 74)
+				wait(5)
+				setTextColor(lastChild(menuReset), 240)
+				wait(5)           
+					) #end if(leftClick)
+			)elseif(sliceCollidePoint(menuExit,mousePixelX,mousePixelY))then(
+				if(hoverBtn<>menuExit)then(
+					playSound(2,false,true)
+					hoverBtn := menuExit
+					setTextColor(lastChild(menuSettings),240)
+					setTextColor(lastChild(menuReset),240)
+					setTextColor(lastChild(menuQuitGame),240)
+					setTextColor(lastChild(menuDebug),240)
+					)
+				setCursor(cursor:pick)
+				setTextColor(lastChild(menuExit), 74)
+				if(leftClick)then(
+						playSound(4)
+				setTextColor(lastChild(menuExit), 240)
+				wait(5)
+				setTextColor(lastChild(menuExit), 74)
+				wait(5)
+				setTextColor(lastChild(menuExit), 240)
+				wait(5)
+				resetGame            
+					) #end if(leftClick)
+				)elseif(sliceCollidePoint(menuQuitGame,mousePixelX,mousePixelY))then(
+					if(hoverBtn<>menuQuitGame)then(
+					playSound(2,false,true)
+					hoverBtn := menuQuitGame
+					setTextColor(lastChild(menuSettings),240)
+					setTextColor(lastChild(menuReset),240)
+					setTextColor(lastChild(menuDebug),240)
+					setTextColor(lastChild(menuExit),240)
+					)
+				setCursor(cursor:pick)
+				setTextColor(lastChild(menuQuitGame), 74)
+				if(leftClick)then(
+						playSound(4)
+				setTextColor(lastChild(menuQuitGame), 240)
+				wait(5)
+				setTextColor(lastChild(menuQuitGame), 74)
+				wait(5)
+				setTextColor(lastChild(menuQuitGame), 240)
+				wait(5)
+				gameOver            
+					) #end if(leftClick)
+				)else(
+				setTextColor(lastChild(menuDebug), 240)
+				setTextColor(lastChild(menuSettings), 240)
+				setTextColor(lastChild(menuReset), 240)
+				setTextColor(lastChild(menuExit), 240)
+				setTextColor(lastChild(menuQuitGame), 240)
+				setCursor(cursor:pointer)
+			) #end main if/then/else
+		resetInputs()
+		wait(1)
+
+		)
 end
 
 
 plotscript, titleMenuPlay, begin
-  fadeScreenOut
-  showBackdrop(-1)
-  freeSlice(lookupSlice(sli:titleMenu))
-  bootstrap()
+	fadeScreenOut
+	showBackdrop(-1)
+	freeSlice(lookupSlice(sli:titleMenu))
+	bootstrap()
 end
 
 plotscript, menuContinue, begin
-  #This needs to be replaced with a Load menu.
-  #resetGame
+	#This needs to be replaced with a Load menu.
+	#resetGame
 end
 
 plotscript, titleMenuQuit, begin
-  gameOver
+	gameOver
 end
 
 plotscript, returnToTitle, begin
-  resetGame
+	resetGame
 end
 
 script, initCommandMenu, begin
-  variable(col)
-  col := loadSliceCollection(4)
-  commandMenu := lookupSlice(sli:commandMenu, col)
-  setParent(commandMenu, hud)
-  hideCommandMenu()
-  freeSlice(col)
+	variable(col)
+	col := loadSliceCollection(4)
+	commandMenu := lookupSlice(sli:commandMenu, col)
+	cooldownOverlay := lookupSlice(sli:cooldownOverlay, col)
+	setParent(commandMenu, hud)
+	#hideCommandMenu()
+	setParent(cooldownOverlay, hud)
+	setSliceVisible(lookupSlice(sli:cooldownMeter1),false)
+	setSliceVisible(lookupSlice(sli:cooldownMeter2),false)
+	setSliceVisible(lookupSlice(sli:cooldownMeter3),false)
+	setSliceVisible(lookupSlice(sli:cooldownMeter4),false)
+	freeSlice(col)
+	setSpritePalette(lookupSlice(sli:iconAuto),6)
 end
 
 script, updateCommandMenu, begin
-variable(classAbility1,classAbility2,classAbility3,classAbility4)
+variable(unitClass,unitWalk,unitPatrol,unitAttack,unitStop,unitPray,classAbility1,classAbility2,classAbility3,classAbility4)
 
-  unitClass := getUnitStat(selectedUnit, unitData:class)
-  classAbility1 := firstSelectChild(commandMenu)
-  classAbility2 := nextSelectSibling(classAbility1)
-  classAbility3 := nextSelectSibling(classAbility2)
-  classAbility4 := nextSelectSibling(classAbility3)
-  switch(unitClass)do(
-    case(unit:disciple)do(
-      setSelectSliceIndex(classAbility1,0)
-      setSelectSliceIndex(classAbility2,1)
-      setSelectSliceIndex(classAbility3,1)
-      setSelectSliceIndex(classAbility4,0)
-      )
-    case(unit:friend)do(
-      setSelectSliceIndex(classAbility1,0)
-      setSelectSliceIndex(classAbility2,0)
-      setSelectSliceIndex(classAbility3,0)
-      setSelectSliceIndex(classAbility4,0)
-      )
-    case(unit:medic)do(
-      setSelectSliceIndex(classAbility1,0)
-      setSelectSliceIndex(classAbility2,0)
-      setSelectSliceIndex(classAbility3,0)
-      setSelectSliceIndex(classAbility4,0)
-      )
-    case(unit:builder)do(
-      setSelectSliceIndex(classAbility1,0)
-      setSelectSliceIndex(classAbility2,3)
-      setSelectSliceIndex(classAbility3,0)
-      setSelectSliceIndex(classAbility4,0)
-      )
-    case(unit:musician)do(
-      setSelectSliceIndex(classAbility1,4)
-      setSelectSliceIndex(classAbility2,0)
-      setSelectSliceIndex(classAbility3,0)
-      setSelectSliceIndex(classAbility4,0)
-      )
-    case(unit:soldier)do(
-      setSelectSliceIndex(classAbility1,1)
-      setSelectSliceIndex(classAbility2,2)
-      setSelectSliceIndex(classAbility3,0)
-      setSelectSliceIndex(classAbility4,1)
-      )
-    case(else)do(
-      setSelectSliceIndex(classAbility1,0)
-      setSelectSliceIndex(classAbility2,0)
-      setSelectSliceIndex(classAbility3,0)
-      setSelectSliceIndex(classAbility4,0)
-      )
-    
-    )
+	unitClass := getUnitStat(selectedUnit, unitData:class)
+	unitWalk := firstSelectChild(firstChild(commandMenu))
+	unitPatrol := nextSelectSibling(unitWalk)
+	unitAttack := nextSelectSibling(unitPatrol)
+	unitStop := nextSelectSibling(unitAttack)
+	unitPray := nextSelectSibling(unitStop)
+	classAbility1 := nextSelectSibling(unitPray)
+	classAbility2 := nextSelectSibling(classAbility1)
+	classAbility3 := nextSelectSibling(classAbility2)
+	classAbility4 := nextSelectSibling(classAbility3)
+
+	setSelectSliceIndex(unitWalk,1)
+	setSelectSliceIndex(unitPatrol,1)
+	setSelectSliceIndex(unitAttack,1)
+	setSelectSliceIndex(unitStop,1)
+	setSelectSliceIndex(unitPray,1)
+
+	switch(unitClass)do(
+		case(unit:disciple)do(
+			setSelectSliceIndex(classAbility1,0)
+			setSelectSliceIndex(classAbility2,1)
+			setSelectSliceIndex(classAbility3,1)
+			setSelectSliceIndex(classAbility4,0)
+			)
+		case(unit:friend)do(
+			setSelectSliceIndex(classAbility1,0)
+			setSelectSliceIndex(classAbility2,0)
+			setSelectSliceIndex(classAbility3,0)
+			setSelectSliceIndex(classAbility4,0)
+			)
+		case(unit:medic)do(
+			setSelectSliceIndex(classAbility1,0)
+			setSelectSliceIndex(classAbility2,0)
+			setSelectSliceIndex(classAbility3,0)
+			setSelectSliceIndex(classAbility4,0)
+			)
+		case(unit:builder)do(
+			setSelectSliceIndex(classAbility1,5)
+			setSelectSliceIndex(classAbility2,3)
+			setSelectSliceIndex(classAbility3,0)
+			setSelectSliceIndex(classAbility4,0)
+			)
+		case(unit:musician)do(
+			setSelectSliceIndex(classAbility1,4)
+			setSelectSliceIndex(classAbility2,0)
+			setSelectSliceIndex(classAbility3,0)
+			setSelectSliceIndex(classAbility4,0)
+			)
+		case(unit:soldier)do(
+			setSelectSliceIndex(classAbility1,1)
+			setSelectSliceIndex(classAbility2,2)
+			setSelectSliceIndex(classAbility3,0)
+			setSelectSliceIndex(classAbility4,1)
+			)
+		case(else)do(
+			setSelectSliceIndex(classAbility1,0)
+			setSelectSliceIndex(classAbility2,0)
+			setSelectSliceIndex(classAbility3,0)
+			setSelectSliceIndex(classAbility4,0)
+
+			)
+		
+		)
 end
 
+script, resetCommandMenu, begin
+	variable(unitWalk,unitPatrol,unitAttack,unitStop,unitPray,classAbility1,classAbility2,classAbility3,classAbility4)
+	unitWalk := firstSelectChild(firstChild(commandMenu))
+	unitPatrol := nextSelectSibling(unitWalk)
+	unitAttack := nextSelectSibling(unitPatrol)
+	unitStop := nextSelectSibling(unitAttack)
+	unitPray := nextSelectSibling(unitStop)
+	classAbility1 := nextSelectSibling(unitPray)
+	classAbility2 := nextSelectSibling(classAbility1)
+	classAbility3 := nextSelectSibling(classAbility2)
+	classAbility4 := nextSelectSibling(classAbility3)
+
+	setSelectSliceIndex(unitWalk,0)
+	setSelectSliceIndex(unitPatrol,0)
+	setSelectSliceIndex(unitAttack,0)
+	setSelectSliceIndex(unitStop,0)
+	setSelectSliceIndex(unitPray,0)
+	setSelectSliceIndex(classAbility1,0)
+	setSelectSliceIndex(classAbility2,0)
+	setSelectSliceIndex(classAbility3,0)
+	setSelectSliceIndex(classAbility4,0)
+
+end
 
 script, hideCommandMenu, begin
-  setSliceVisible(commandMenu, false)
+	setSliceVisible(commandMenu, false)
 end
 
 script, showCommandMenu, begin
-  setSliceVisible(commandMenu, true)
+	setSliceVisible(commandMenu, true)
+end
+
+script, doScenarioMenu, begin
+	variable(
+		# scenarioMenu
+		scenarioPlayButton
+		scenarioSettingsButton
+		scenarioQuitButton
+		scenarioDescription
+		scenarioTitle
+		scenarioTitleShadow
+		)
+
+	scenarioMenu := loadSliceCollection(5)
+	scenarioPlayButton := lookupSlice(sli:scenarioPlayButton,scenarioMenu)
+	scenarioSettingsButton := lookupSlice(sli:scenarioSettingsButton,scenarioMenu)
+	scenarioQuitButton := lookupSlice(sli:scenarioQuitButton,scenarioMenu)
+	scenarioDescription := lookupSlice(sli:scenarioDescription,scenarioMenu) 
+	#scenarioTitle := 
+	#scenarioTitleShadow := 
+
+
 end

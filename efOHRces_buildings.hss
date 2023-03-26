@@ -1,82 +1,477 @@
-#Buildings scripts for eFOHRces by ChocoSOLDIER
+# Buildings scripts for eFOHRces by ChocoSOLDIER
 
-script, doBuilding, whichBuilding, begin
-	#do highlight effect over entire zone - maptiles on a layer? rectangle slice with blending? idk we'll try things
-	#play mouseover sound
-	if(leftClick)then(
-		#play selection sound
-		#open a window with info + upgrades
-		loadSliceCollection(8)
-		#doBuildingWindow(whichBuilding)
-		)
-	if(rightclick)then(
-		#lol idk what should happen
-		)
-	else(
-		#idk stuff?
-		)
-end
+script, doBuildingWindow, whichBuilding, begin
+	variable(txt,txtSh,building,type,level,isOwned)
+	selectedBuilding := whichBuilding
+	building := whichBuilding
+	if(buildingWindow==0)then(buildingWindow := loadSliceCollection(8))
+	if(state<>state:windowOpen)then(state := state:windowOpen)
+	isOwned := getBuildingStat(whichBuilding,building:owned)
 
-script, doBuildingWindow, begin
-	variable(col)
-	col := loadSliceCollection()
-	#update the info on the window in a manner similar to the HUD
-	#present upgrades depending on building type and level
-	switch(building:type)do(
+	# update the info on the window in a manner similar to the HUD
+	type := getBuildingStat(whichBuilding,building:type)
+	level := getBuildingStat(whichBuilding,building:level)
+
+	if(isOwned==false)then(
+		$0="Price"
+		setSliceText(lookupSlice(sli:bWinUpgrade),0)
+		$0="Purchase"
+		setSliceText(firstChild(lookupSlice(sli:bWinButtonUpgrade)),0)
+		setSliceText(sliceChild(lookupSlice(sli:bWinButtonUpgrade),1),0)
+		)elseif(isOwned==true)then(
+		$0="Upgrade Cost"
+		setSliceText(lookupSlice(sli:bWinUpgrade),0)
+		$0="Upgrade"
+		setSliceText(firstChild(lookupSlice(sli:bWinButtonUpgrade)),0)
+		setSliceText(sliceChild(lookupSlice(sli:bWinButtonUpgrade),1),0)
+		)
+
+	switch(type)do(
 		case(btype:housing)do(
-			)
-		case(btype:financial)do(
-			)
-		case(btype:food)do(
-			)
-		case(btype:religious)do(
-			)
-
-		)
-
-end
-
-script, buildingGen, begin
-	variable(zoneHere,aText,doneWith,i,j)
-	for(i, 0, mapWidth--1,1)do(
-		for(j,0,mapHeight--1,1)do(
-			zoneHere := zoneAtSpot(i,j)
-			if(zoneHere<>0 && zoneHere<<100)then(
-				if(extraLength(getZone(zoneHere))==3)then(
-					aText := createText
-					resizeExtra(getZone(zoneHere),10)
-					switch(zoneHere/10)do(
-						case(0)do( #keep soft error from triggering when no zone
-							)
-						case(1,2)do( #Housing - zones 10-29
-							setBuildingStat(zoneHere,building:type,btype:housing)
-							)
-						case(3,4)do( #Financial - zones 30-49
-							)
-						case(5,6)do( #Food - zones 50-69(nice)
-							)
-						case(7,8)do( #Religious - zones 70-89
-							)
-						case(9)do(	#idk i thought maybe do something special?
-							)
-						case(else)do(
-							aText := createText
-							centerSlice(aText)
-							$0="Why?"
-							setSliceText(aText,0)
-							)
-						)
+		# Window Title
+			txt := lookupSlice(sli:bWinTitle)
+			txtSh := lookupSlice(sli:bWinTitleShadow)
+			switch(level)do(
+				case(0)do($0="Fleabag Motel")
+				case(1)do($0="Slum Apartments")
+				case(2)do($0="Section 8 Barrio")
+				case(3)do($0="Little Kowloon")
+				)
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Type
+			txt := lookupSlice(sli:bWinType)
+			txtSh := lookupSlice(sli:bWinTypeShadow)
+			$0="Housing"
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Upgrade Cost
+			txt := lookupSlice(sli:bWinUpgradeCost)
+			txtSh := lookupSlice(sli:bWinUpgradeCostShadow)
+			clearString(0)
+			switch(level)do(
+				case(0)do(
+					appendNumber(0,500)
+					)
+				case(1)do(
+					appendNumber(0,1000)
+					)
+				case(2)do(
+					appendNumber(0,2000)
+					)
+				case(3)do(
+					$0="Fully Upgraded"
 					)
 				)
+				setSliceText(txt,0)
+				setSliceText(txtSh,0)
+		# Building Flavor Text
+			txt := lookupSlice(sli:bWinFlavorText)
+			
+			switch(level)do(
+				case(0)do(
+					$0="This run-down building sports a battered sign reading \"Bubba's Bedbug Bonanza\", and there is still the corpse of a dead prostitute stuffed under one of the beds. Maybe five rooms here are actually fit for a person to live in."
+					)
+				case(1)do(
+					$0="These apartments seemed reasonably priced in the listing but now that you're here you can see the photos were all cherry-picked. The roof has severe water damage and at least half the units contain failed meth labs. All told you could maybe put ten people up in here."
+					)
+				case(2)do(
+					$0="Decently built and somewhat maintained, but the crowd here is rough. Upon arrival you have to chase a guy selling crack away from the entrance, and the nighttime sounds are mostly thumping bass speakers and gunshots echoing. You wouldn't want to live here, but fifteen of your followers won't have a choice."
+					)
+				case(3)do(
+					$0="Holy shit did you know people could live this densely? You don't own this whole building, just a couple rooms, but those rooms are divided up piecemeal to accomodate up to twenty people."
+					)
+				)
+			setSliceText(txt,0)
+			)
+		case(btype:financial)do(
+			# Window Title
+			txt := lookupSlice(sli:bWinTitle)
+			txtSh := lookupSlice(sli:bWinTitleShadow)
+			switch(level)do(
+				case(0)do($0="Public ATM")
+				case(1)do($0="Check Cashing Place")
+				case(2)do($0="Payday Loans")
+				case(3)do($0="Last National Bank")
+				)
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Type
+			txt := lookupSlice(sli:bWinType)
+			txtSh := lookupSlice(sli:bWinTypeShadow)
+			$0="Financial"
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Upgrade Cost
+			txt := lookupSlice(sli:bWinUpgradeCost)
+			txtSh := lookupSlice(sli:bWinUpgradeCostShadow)
+			clearString(0)
+			switch(level)do(
+				case(0)do(
+					appendNumber(0,500)
+					)
+				case(1)do(
+					appendNumber(0,1000)
+					)
+				case(2)do(
+					appendNumber(0,2000)
+					)
+				case(3)do(
+					$0="Fully Upgraded"
+					)
+				)
+				setSliceText(txt,0)
+				setSliceText(txtSh,0)
+		# Building Flavor Text
+			txt := lookupSlice(sli:bWinFlavorText)
+			
+			switch(level)do(
+				case(0)do(
+					$0="The fees are outrageous but the location is so convenient. We both know you're not gonna walk seven blocks to use an ATM in your bank's network."
+					)
+				case(1)do(
+					$0="It's run down, smells like cigar smoke and cat piss, and you're convinced the lady behind the counter *actually* wants you dead, but paying 10% is better than going all the way across town, isn't it?"
+					)
+				case(2)do(
+					$0="It's your money, and you can have it right now - for the low low price of the rest of your money after that. Forever."
+					)
+				case(3)do(
+					$0="Not your first choice, nor really anyone else's, but any port in a storm, right? It may not look trustworthy, but the FDIC plaque is reassuring. Just try not to think about how it's made of copy paper and crayon."
+					)
+				)
+			setSliceText(txt,0)
+			)
+		case(btype:food)do(
+			# Window Title
+			txt := lookupSlice(sli:bWinTitle)
+			txtSh := lookupSlice(sli:bWinTitleShadow)
+			switch(level)do(
+				case(0)do($0="Produce Stand")
+				case(1)do($0="Local Cafe")
+				case(2)do($0="Grocery Store")
+				case(3)do($0="Agricultural Firm")
+				)
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Type
+			txt := lookupSlice(sli:bWinType)
+			txtSh := lookupSlice(sli:bWinTypeShadow)
+			$0="Food"
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Upgrade Cost
+			txt := lookupSlice(sli:bWinUpgradeCost)
+			txtSh := lookupSlice(sli:bWinUpgradeCostShadow)
+			clearString(0)
+			switch(level)do(
+				case(0)do(
+					appendNumber(0,500)
+					)
+				case(1)do(
+					appendNumber(0,1000)
+					)
+				case(2)do(
+					appendNumber(0,2000)
+					)
+				case(3)do(
+					$0="Fully Upgraded"
+					)
+				)
+				setSliceText(txt,0)
+				setSliceText(txtSh,0)
+		# Building Flavor Text
+			txt := lookupSlice(sli:bWinFlavorText)
+			
+			switch(level)do(
+				case(0)do(
+					$0="Honest, locally grown, and heckin' delicious. Now if we had more than just tomatoes and zucchini."
+					)
+				case(1)do(
+					$0="Hires based on nepotism and basically ignores health codes. It's local and delicious though, so you put up with it"
+					)
+				case(2)do(
+					$0="National chain grocery store that somehow manages to be more expensive than locally grown produce. People will buy it because it's waxed and dyed to look good though."
+					)
+				case(3)do(
+					$0="A local co-op of farmers, mechanics, and equipment dealers. You're not sure how they managed to cut the big guys out of their supply chain, but as long as it's not GMO you don't have any questions."
+					)
+				)
+			setSliceText(txt,0)
+			)
+		case(btype:religious)do(
+			# Window Title
+			txt := lookupSlice(sli:bWinTitle)
+			txtSh := lookupSlice(sli:bWinTitleShadow)
+			switch(level)do(
+				case(0)do($0="Drive-Thru Wedding Chapel")
+				case(1)do($0="Nondenominational Cathedral")
+				case(2)do($0="Interfaith Community Center")
+				case(3)do($0="Megachurch Arcology")
+				)
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Type
+			txt := lookupSlice(sli:bWinType)
+			txtSh := lookupSlice(sli:bWinTypeShadow)
+			$0="Religious"
+			setSliceText(txt,0)
+			setSliceText(txtSh,0)
+		# Building Upgrade Cost
+			txt := lookupSlice(sli:bWinUpgradeCost)
+			txtSh := lookupSlice(sli:bWinUpgradeCostShadow)
+			clearString(0)
+
+			switch(level)do(
+				case(0)do(
+					appendNumber(0,500)
+					)
+				case(1)do(
+					appendNumber(0,1000)
+					)
+				case(2)do(
+					appendNumber(0,2000)
+					)
+				case(3)do(
+					$0="Fully Upgraded"
+					)
+				)
+				setSliceText(txt,0)
+				setSliceText(txtSh,0)
+		# Building Flavor Text
+			txt := lookupSlice(sli:bWinFlavorText)
+			
+			switch(level)do(
+				case(0)do(
+					$0="Look, it's fast, it's cheap, and they read the Bible. Perfect for couples on the go who want to stop living in sin. Baptisms cost extra."
+					)
+				case(1)do(
+					$0="A fully-functional center for worship and fellowship services, complete with a youth center, parsonage, and gymnasium. Sadly, the pastor won't let you house your followers here."
+					)
+				case(2)do(
+					$0="something something"
+					)
+				case(3)do(
+					$0="Not your first choice, nor really anyone else's, but any port in a storm, right? It may not look trustworthy, but the FDIC plaque is reassuring. Just try not to think about how it's made of copy paper and crayon."
+					)
+				)
+			setSliceText(txt,0)
+			)
+
+		)
+# Building Level
+	txt := lookupSlice(sli:bWinLevel)
+	txtSh := lookupSlice(sli:bWinLevelShadow)
+	clearString(0)
+	appendNumber(0, level)
+	setSliceText(txt,0)
+	setSliceText(txtSh,0)
+# Building Output
+	txt := lookupSlice(sli:bWinOutput)
+	txtSh := lookupSlice(sli:bWinOutputShadow)
+	clearString(0)
+	switch(type)do(
+		case(0,1,2)do(
+			appendNumber(0,getBuildingStat(selectedBuilding,building:output))
+			)
+		case(3)do(
+			$0="Train Disciple"
+			)
+		case(4)do(
+			$0="Train Soldier"
+			)
+		case(5)do(
+			$0="Train Medic"
+			)
+		)
+	setSliceText(txt,0)
+	setSliceText(txtSh,0)
+
+end
+
+ 
+script, buildingGen, begin
+	variable(zoneHere,zoneHandle,doneWith,i,j,bSprite)
+	for(i, 0, mapWidth--1)do(
+		for(j, 0, mapHeight--1)do(
+			if(doneWith <> 0 && readZone(doneWith,i,j))then(
+				continue
+				)elseif(zoneAtSpot(i,j))then(
+					zoneHere := zoneAtSpot(i,j)
+					zoneHandle := getZone(zoneHere)
+						#resizeExtra(zoneHandle,6)
+						bSprite := loadWalkaboutSprite(28)
+						putSprite(bSprite,i*20,j*20)
+						resizeExtra(bsprite, 10)
+						setSliceLookup(bSprite, sli:buildingSlice)
+						setParent(bSprite, buildingLayer)
+						setBuildingStat(bSprite,building:type,zoneHere/100)
+						setBuildingLevel(bSprite)
+						#doBuildingOutput(bsprite)
+						doneWith := zoneHere
+				)else(continue)	
 			)
 		)
 end
 
+	
+
 script, setBuildingStat, whichBuilding, whichStat, value, begin
-	setExtra(getZone(whichBuilding),whichstat,value)
+	setSliceExtra (whichBuilding,whichstat,value)
 
 end
 
 script, getBuildingStat,whichBuilding, whichStat, begin
-	return(getExtra(getZone(whichBuilding),whichStat ))
+	return (getSliceExtra (whichBuilding,whichStat) )
+end
+
+script, doBuildingOutput, building, begin
+	variable(bOut, type)
+	bOut := getBuildingStat(building,building:output)
+	type := getBuildingStat(building,building:type)
+	switch(type)do(
+		case(btype:housing)do(
+			housingTotal += bOut
+			)
+		case(btype:financial)do(
+			moneyAvailable += bOut
+			)
+		case(btype:food)do(
+			foodAvailable += bOut
+			)
+		case(btype:religious)do(
+			# spiritAvailable += bOut
+			)
+		case(btype:military)do(
+			)
+		case(btype:medical)do(
+			)
+		)
+end
+
+script, setBuildingLevel, building, level=0, begin
+	variable(type)
+	setBuildingStat(building,building:level,level)
+	type := getBuildingStat(building,building:type)
+	switch(type)do(
+		case(btype:housing)do(
+			switch(level)do(
+				case(0)do(
+					setBuildingStat(building,building:output,5)
+					setBuildingStat(building,building:health,10)
+					)
+				case(1)do(
+					setBuildingStat(building,building:output,10)
+					setBuildingStat(building,building:health,10)
+					)
+				case(2)do(
+					setBuildingStat(building,building:output,15)
+					setBuildingStat(building,building:health,10)
+					)
+				case(3)do(
+					setBuildingStat(building,building:output,20)
+					setBuildingStat(building,building:health,10)
+					)
+				)
+			)
+		case(btype:financial)do(
+			switch(level)do(
+				case(0)do(
+					setBuildingStat(building,building:output,5)
+					setBuildingStat(building,building:health,10)
+					)
+				case(1)do(
+					setBuildingStat(building,building:output,10)
+					setBuildingStat(building,building:health,10)
+					)
+				case(2)do(
+					setBuildingStat(building,building:output,15)
+					setBuildingStat(building,building:health,10)
+					)
+				case(3)do(
+					setBuildingStat(building,building:output,20)
+					setBuildingStat(building,building:health,10)
+					)
+				)
+			)
+		case(btype:food)do(
+			switch(level)do(
+				case(0)do(
+					setBuildingStat(building,building:output,5)
+					setBuildingStat(building,building:health,10)
+					)
+				case(1)do(
+					setBuildingStat(building,building:output,10)
+					setBuildingStat(building,building:health,10)
+					)
+				case(2)do(
+					setBuildingStat(building,building:output,15)
+					setBuildingStat(building,building:health,10)
+					)
+				case(3)do(
+					setBuildingStat(building,building:output,20)
+					setBuildingStat(building,building:health,10)
+					)
+				)
+			)
+		case(btype:religious)do(
+			switch(level)do(
+				case(0)do(
+					setBuildingStat(building,building:output,5)
+					setBuildingStat(building,building:health,10)
+					)
+				case(1)do(
+					setBuildingStat(building,building:output,10)
+					setBuildingStat(building,building:health,10)
+					)
+				case(2)do(
+					setBuildingStat(building,building:output,15)
+					setBuildingStat(building,building:health,10)
+					)
+				case(3)do(
+					setBuildingStat(building,building:output,20)
+					setBuildingStat(building,building:health,10)
+					)
+				)
+			)
+		case(btype:military)do(
+			switch(level)do(
+				case(0)do(
+					setBuildingStat(building,building:output,5)
+					setBuildingStat(building,building:health,10)
+					)
+				case(1)do(
+					setBuildingStat(building,building:output,10)
+					setBuildingStat(building,building:health,10)
+					)
+				case(2)do(
+					setBuildingStat(building,building:output,15)
+					setBuildingStat(building,building:health,10)
+					)
+				case(3)do(
+					setBuildingStat(building,building:output,20)
+					setBuildingStat(building,building:health,10)
+					)
+				)
+			)
+		case(btype:medical)do(
+			switch(level)do(
+				case(0)do(
+					setBuildingStat(building,building:output,5)
+					setBuildingStat(building,building:health,10)
+					)
+				case(1)do(
+					setBuildingStat(building,building:output,10)
+					setBuildingStat(building,building:health,10)
+					)
+				case(2)do(
+					setBuildingStat(building,building:output,15)
+					setBuildingStat(building,building:health,10)
+					)
+				case(3)do(
+					setBuildingStat(building,building:output,20)
+					setBuildingStat(building,building:health,10)
+					)
+				)
+			)
+		)
 end

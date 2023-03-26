@@ -1,30 +1,37 @@
-# Input stuff for efOHRces by ChocoSOLDIER
+# Input handlers for efOHRces by ChocoSOLDIER
 
 plotscript, onKeypress, begin
   if(keyIsPressed(key:esc)) then(
-      escPressed := true
-    )
+	  escPressed := true
+		)
   if(keyIsPressed(key:w) || keyIsPressed(key:up)) then(
-    panUp := true
-    )
+		panUp := true
+		)
   if(keyIsPressed(key:s) || keyIsPressed(key:down)) then(
-    panDown := true
-    )
+		panDown := true
+		)
   if(keyIsPressed(key:a) || keyIsPressed(key:left)) then(
-    panLeft := true
-    )
+		panLeft := true
+		)
   if(keyIsPressed(key:d) || keyIsPressed(key:right)) then(
-    panRight := true
-    )
+		panRight := true
+		)
   if(mouseClick(leftButton)) then(
-    leftClick := true
-    )
+		leftClick := true
+		)
   if(mouseClick(rightButton)) then(
-    rightClick := true
-    )
+		rightClick := true
+		)
   if(keyval(key:shift) == 1) then(
-    shiftPressed := true
-    )
+		shiftPressed := true
+		)
+	if(mouseButton(leftButton)) then(
+		lmbDown := true
+		)
+	if(mouseButton(rightButton)) then(
+		rmbDown := true
+		)
+
 end
 
 script, resetInputs, begin
@@ -52,22 +59,26 @@ script, startMouse, begin
 end
 
 script, doCameraScroll, begin
-  variable(spd)
+  variable(spd,mapCursor)
 
   if(shiftPressed) then(spd := 10)
   else(spd := 5)
 
   if(topMenu == false) then(
-      if(panLeft) then(
-          panCamera(left,1,spd)
-      )elseif(panRight) then(
-          panCamera(right,1,spd)
-      )elseif(panUp) then(
-          panCamera(up,1,spd)
-      )elseif(panDown) then(
-          panCamera(down,1,spd)
-      )
-    )
+	  if(panLeft) then(
+		  panCamera(left,1,spd)
+	  )elseif(panRight) then(
+		  panCamera(right,1,spd)
+	  )elseif(panUp) then(
+		  panCamera(up,1,spd)
+	  )elseif(panDown) then(
+		  panCamera(down,1,spd)
+	  )
+	)
+
+	mapCursor := lookupSlice(sli:minimapCursor)
+
+	putSlice(mapCursor,(cameraPixelX/7),(cameraPixelY/7))
   #resetInputs()
 end
 
@@ -95,3 +106,28 @@ script, topmostSliceAtPixel, parent, x, y, checkDescendants=true, visibleOnly=tr
   )
 end
 
+script, clickToPan, begin
+	variable(spd,ret)
+  if(shiftPressed) then(
+  	spd := 10
+  	)else(spd := 5)
+	if(originSet==true)then(
+		if(originX--20 >> mousePixelX)then(
+			panCamera(left,1,spd)
+			)
+		if(originX+20 << mousePixelX)then(
+				panCamera(right,1,spd)
+				)
+		if(originY--20 >> mousePixelY)then(
+				panCamera(up,1,spd)
+				)
+		if(originY+20 << mousePixelY)then(
+				panCamera(down,1,spd)
+				)
+		)elseif(originSet<>true)then(
+		originX := mousePixelX
+		originY := mousePixelY
+		originSet := true
+		) 
+		showValue(originSet,originX,originY)
+end

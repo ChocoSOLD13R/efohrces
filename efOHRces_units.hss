@@ -1,213 +1,783 @@
-# unit functions for efOHRces by ChocoSOLDIER
+# Unit functions for efOHRces by ChocoSOLDIER 
+
+script, doConvert, unit, begin
+	
+end
+
+script,doSing,unit,begin
+	variable(i,j,targ,targX,targY,rangeLow,rangeHigh,singStrength,ulevel,ctr)
+
+	rangeHigh := (getUnitStat(unit,unitData:level)+5)/2
+	rangeLow := 0--rangeHigh
+	ctr := getUnitStat(unit,unitData:counter)
+	if(modulus(ctr,50)==0)then(
+		for(i,rangeLow,rangeHigh)do(
+			for(j,rangeLow,rangeHigh)do(
+				if(npcAtSpot(npcX(unit)+i,npcY(unit)+j)<>0 && npcAtSpot(npcX(unit)+i,npcY(unit)+j)<>unit)then(
+					targ := npcAtSpot(npcX(unit)+i,npcY(unit)+j)
+					targX := npcX(unit)+i
+					targY := npcY(unit)+j
+					singStrength := (getUnitStat(unit,unitData:spirit)/10)+uLevel
+					setUnitStat(targ, unitData:spirit, getUnitStat(targ,unitData:spirit)+singStrength)
+					)
+				)
+			)
+		)elseif(ctr>=200)then(
+		startCooldown(unit,unitData:abilityCooldown2,(600/rangeHigh))
+		setUnitStat(unit,unitData:directive,command:idle)
+		)else(
+		ctr +=1
+		setUnitStat(unit,unitData:counter,ctr)
+		)
+	end
+
+script,doCooldowns,unit,begin
+	variable(i,cdMeter,timeLeft,timeTotal)
+	for(i,unitData:abilityCooldown1,unitData:abilityCooldown4)do(
+		cdMeter := getCooldownMeter(i)
+		if(getUnitStat(unit,i))then(
+			if(selectedUnit==unit && getSliceVisible(cdMeter)==false)then(setSliceVisible(cdMeter,true))
+			timeLeft := getUnitStat(unit,i) --1
+			timeTotal := getCooldownTime(unit,i)
+			setUnitStat(unit,i,timeLeft)
+			setPanelPercent(cdMeter,timeLeft*100/timeTotal)
+			)elseif(timeLeft==0 && timeTotal<>0)then(
+			setSliceVisible(cdMeter,false)
+			setUnitStat(unit,i,0)
+			setUnitStat(unit,i+4,0)
+			)elseif(getSliceVisible(cdMeter) && timeTotal==0)then(setSliceVisible(cdMeter,false))
+		)
+	showValue(i,cdMeter,timeleft,timetotal)
+
+end
+
+script,getCooldownMeter,whichAbility,begin
+	variable(ability,cdMeter)
+	ability := whichAbility
+	switch(ability)do(
+		case(unitData:abilityCooldown1)do(
+			exit(lookupSlice(sli:cooldownMeter1,cooldownOverlay))
+			)
+		case(unitData:abilityCooldown2)do(
+			exit(lookupSlice(sli:cooldownMeter2,cooldownOverlay))
+			)
+		case(unitData:abilityCooldown3)do(
+			exit(lookupSlice(sli:cooldownMeter3,cooldownOverlay))
+			)
+		case(unitData:abilityCooldown4)do(
+			exit(lookupSlice(sli:cooldownMeter4,cooldownOverlay))
+			)
+		)
+end
+
+script, getCooldownTime, unit, whichAbility, begin
+	variable(ability,time)
+	ability := whichAbility
+	switch(ability)do(
+		case(unitData:abilityCooldown1)do(
+			exit(getUnitStat(unit,unitData:cdTime1))
+			)
+		case(unitData:abilityCooldown2)do(
+			exit(getUnitStat(unit,unitData:cdTime2))
+			)
+		case(unitData:abilityCooldown3)do(
+			exit(getUnitStat(unit,unitData:cdTime3))
+			)
+		case(unitData:abilityCooldown4)do(
+			exit(getUnitStat(unit,unitData:cdTime4))
+			)
+		)
+end
+
+script,startCooldown,unit,ability,time,begin
+	variable(meter)
+	meter := getCooldownMeter(ability)
+	setUnitStat(unit,ability,time)
+	setUnitStat(unit,ability+4,time)
+	setSliceVisible(meter,true)
+	setPanelPercent(meter,100)
+	doCooldowns(unit)
+	showValue(meter)
+end
+
+script, doAttack, attacker, defender, begin
+	# doAttackAnimation()
+
+	variable(as,str,def,hp,ctr,dam)
+
+	# attack speed ticker
+	ctr := getUnitStat(attacker,unitData:counter)
+	# attacker stats
+	as := getUnitStat(attacker,unitData:attackSpeed)
+	str := getUnitStat(attacker,unitData:strength)
+	# defender stats
+	def := getUnitStat(defender,unitData:defense)
+	hp := getUnitStat(defender,unitData:curHp)
+showValue(ctr,as,str,def,hp)
+	if(ctr==(90/as))then(
+		dam := str--def
+		if(dam>>0)then(
+			playSound(9)
+			setUnitStat(defender,unitData:curHp,hp--dam)
+			ctr:=0
+			setUnitStat(attacker,unitData:counter,ctr)
+		#	showValue(defender, dam)
+			)else(playSound(8))
+		)else(
+		ctr+=1
+		setUnitStat(attacker,unitData:counter,ctr)
+		)
+	if(getUnitStat (defender,unitData:directive) == command:attack && getUnitStat (defender,unitData:target) == attacker )then(
+		)else(
+		setUnitStat(defender,unitData:directive,command:attack)
+		setUnitStat(defender,unitData:target,attacker)
+		)
+end
+
+script, doPray, unit, begin
+	variable(uLevel,uSpirit,ctr,prayDone,prayBubble)
+	uLevel := getUnitStat(unit,unitData:level)
+	uSpirit := getUnitStat(unit,unitData:spirit)
+	ctr := getUnitStat(unit,unitData:counter)
+	prayDone := getUnitStat(unit,unitData:fx1)
+	prayBubble := getUnitStat(unit,unitData:fx2)
+	if(prayBubble==0)then(
+		prayBubble:=loadWalkaboutSprite(26)
+		setUnitStat(unit,unitData:fx2,prayBubble)
+		setSpriteFrame(prayBubble,0)
+		setParent(prayBubble,fxLayer)
+		putSlice(prayBubble,npcPixelX(unit),npcPixelY(unit)--20)
+#		setSliceY(prayBubble, sliceY(prayBubble)--20)
+		setSliceLookup(prayBubble,sli:prayBubble)
+		setUnitStat(unit,unitData:target,0)
+		)elseif(sliceX(prayBubble)<>npcPixelX || sliceY(prayBubble)+20<>npcPixelY)then(
+			putSlice(prayBubble,npcPixelX(unit),npcPixelY(unit))
+			setSliceY(prayBubble, sliceY(prayBubble)--20)
+		)
+	switch(uLevel)do(
+		case(0)do(
+			showValue(ctr,prayBubble,prayDone)
+			if(ctr >= 300)then(
+				if(prayDone==0)then(
+					setUnitStat(unit,unitData:fx1,1)
+					setSpriteFrame(prayBubble,4)
+					setUnitStat(unit,unitData:spirit,uSpirit+uSpirit/30)
+					playSound(10)
+					)elseif(ctr>=315)then(
+					setUnitStat(unit,unitData:counter,0)
+					setUnitStat(unit,unitData:directive,command:idle)
+					freeSlice(prayBubble)
+					setUnitStat(unit,unitData:fx1,0)
+					setUnitStat(unit,unitData:fx2,0)
+				)else(ctr+=1,setUnitStat(unit,unitData:counter,ctr))
+				)else(
+					if(modulus(ctr,30)==0)then(
+						if(getSpriteFrame(prayBubble)<<3)then(setSpriteFrame(prayBubble,getSpriteFrame(prayBubble)+1))
+							else(setSpriteFrame(prayBubble,0))
+						)
+					ctr+=1
+					setUnitStat(unit,unitData:counter,ctr)
+				)
+			)
+		case(1)do(
+			showValue(ctr,prayBubble,prayDone)
+			if(ctr >= 200)then(
+				if(prayDone==0)then(
+					setUnitStat(unit,unitData:fx1,1)
+					setSpriteFrame(prayBubble,4)
+					setUnitStat(unit,unitData:spirit,uSpirit+uSpirit/25)
+					playSound(10)
+					)elseif(ctr>=215)then(
+					setUnitStat(unit,unitData:counter,0)
+					setUnitStat(unit,unitData:directive,command:idle)
+					freeSlice(prayBubble)
+					setUnitStat(unit,unitData:fx1,0)
+					setUnitStat(unit,unitData:fx2,0)
+				)else(ctr+=1,setUnitStat(unit,unitData:counter,ctr))
+				)else(
+					if(modulus(ctr,30)==0)then(
+						if(getSpriteFrame(prayBubble)<<3)then(setSpriteFrame(prayBubble,getSpriteFrame(prayBubble)+1))
+							else(setSpriteFrame(prayBubble,0))
+						)
+					ctr+=1
+					setUnitStat(unit,unitData:counter,ctr)
+					)
+			)
+		case(2)do(
+			showValue(ctr,prayBubble,prayDone)
+			if(ctr >= 100)then(
+				if(prayDone==0)then(
+					setUnitStat(unit,unitData:fx1,1)
+					setSpriteFrame(prayBubble,4)
+					setUnitStat(unit,unitData:spirit,uSpirit+uSpirit/20)
+					playSound(10)
+					)elseif(ctr>=115)then(
+					setUnitStat(unit,unitData:counter,0)
+					setUnitStat(unit,unitData:directive,command:idle)
+					freeSlice(prayBubble)
+					setUnitStat(unit,unitData:fx1,0)
+					setUnitStat(unit,unitData:fx2,0)
+				)else(ctr+=1,setUnitStat(unit,unitData:counter,ctr))
+				)else(
+					if(modulus(ctr,30)==0)then(
+						if(getSpriteFrame(prayBubble)<<3)then(setSpriteFrame(prayBubble,getSpriteFrame(prayBubble)+1))
+							else(setSpriteFrame(prayBubble,0))
+						)
+					ctr+=1
+					setUnitStat(unit,unitData:counter,ctr)
+				)
+			)
+		)
+
+end
+
+script, doPreach, unit, begin
+	variable(
+		uSide
+		uLevel
+		uSpirit
+		ctr
+		preachDone
+		preachBubble
+		i
+		j
+		preachRangeHigh
+		preachRangeLow
+		targ
+		targX
+		targY
+		preachStrength
+		)
+
+	uSide := getUnitStat(unit,unitData:side)
+	uLevel := getUnitStat(unit,unitData:level)
+	uSpirit := getUnitStat(unit,unitData:spirit)
+	ctr := getUnitStat(unit,unitData:counter)
+	preachDone := getUnitStat(unit,unitData:fx1)
+	preachBubble := getUnitStat(unit,unitData:fx2)
+	preachRangeHigh := 2+uLevel
+	preachRangeLow := 0--preachRangeHigh
+
+	if(preachBubble==0)then(
+		preachBubble:=loadWalkaboutSprite(26)
+		setUnitStat(unit,unitData:fx2,preachBubble)
+		setSpriteFrame(preachBubble,5)
+		setParent(preachBubble,fxLayer)
+		putSlice(preachBubble,npcPixelX(unit),npcPixelY(unit)--20)
+#		setSliceY(preachBubble, sliceY(preachBubble)--20)
+		setSliceLookup(preachBubble,sli:preachBubble)
+		setUnitStat(unit,unitData:target,0)
+		)elseif(sliceIsValid(preachBubble))then(
+			if(sliceX(preachBubble)<>npcPixelX || sliceY(preachBubble)+20<>npcPixelY)then(
+				putSlice(preachBubble,npcPixelX(unit),npcPixelY(unit))
+				setSliceY(preachBubble, sliceY(preachBubble)--20)
+				)
+			)
+		showValue(ctr,preachRangeHigh,preachRangeLow,i,j)
+
+		if(ctr >= 150)then(
+			if(preachDone==0)then(
+				setUnitStat(unit,unitData:fx1,1)
+				setSpriteFrame(preachBubble,4)
+				for(i,preachRangeLow,preachRangeHigh)do(
+					for(j,preachRangeLow,preachRangeHigh)do(
+						if(npcAtSpot(npcX(unit)+i,npcY(unit)+j)<>0 && npcAtSpot(npcX(unit)+i,npcY(unit)+j)<>unit)then(
+							targ := npcAtSpot(npcX(unit)+i,npcY(unit)+j)
+							targX := npcX(unit)+i
+							targY := npcY(unit)+j
+							if(uside>>0)then(
+								preachStrength := (getUnitStat(unit,unitData:spirit)/20)+uLevel
+								)elseif(uSide<<0)then(
+								preachStrength := ((100--getUnitStat(unit,unitData:spirit))/20)+uLevel
+								)elseif(uside==0)then(
+								preachStrength := getUnitStat(unit,unitData:spirit)/10+uLevel
+								)
+							if(uSide>>0)then(
+								setUnitStat(targ, unitData:spirit, getUnitStat(targ,unitData:spirit)+preachStrength)
+								)elseif(uSide<<0)then(
+								setUnitStat(targ, unitData:spirit, getUnitStat(targ,unitData:spirit)--preachStrength)
+								)elseif(uSide==0 && getUnitStat(targ,unitData:side)>>0)then(
+								setUnitStat(targ, unitData:spirit, getUnitStat(targ,unitData:spirit)--preachStrength)
+								)elseif(uside==0 && getUnitStat(targ,unitData:side)<<0)then(
+								setUnitStat(targ, unitData:spirit, getUnitStat(targ,unitData:spirit)+preachStrength)
+								)
+							)
+						)
+					)
+				playSound(10)
+				)elseif(ctr>=165)then(
+				setUnitStat(unit,unitData:counter,0)
+				setUnitStat(unit,unitData:directive,command:preach)
+				freeSlice(preachBubble)
+				setUnitStat(unit,unitData:fx1,0)
+				setUnitStat(unit,unitData:fx2,0)
+				)else(
+				ctr+=1,setUnitStat(unit,unitData:counter,ctr)
+				)
+			)elseif(sliceIsValid(preachBubble))then(
+				if(modulus(ctr,30)==0)then(
+					if(getSpriteFrame(preachBubble)<<7)then(setSpriteFrame(preachBubble,getSpriteFrame(preachBubble)+1))
+						else(setSpriteFrame(preachBubble,5))
+					)
+					ctr+=1
+					setUnitStat(unit,unitData:counter,ctr)
+				)else(
+				setUnitStat(unit,unitData:directive,command:idle)
+				setUnitStat(unit,unitData:fx1,0)
+				setUnitStat(unit,unitData:fx2,0)
+				setUnitStat(unit,unitData:counter,0)
+				)
+
+end
 
 script, getUnitStat, who, whichStat, begin
-  variable(unitSlice)
-  unitSlice := getNpcSlice(who)
-  return(getSliceExtra(unitSlice,whichStat))
+	variable(unitSlice)
+	if(sliceIsValid(who))then(unitSlice := who)
+	else(unitSlice := getNpcSlice(who))
+	return(getSliceExtra(unitSlice,whichStat))
 end
 
 script, setUnitStat, who, whichStat, value, begin
-  variable(unitSlice)
-  unitSlice := getNpcSlice(who)
-  setSliceExtra(unitSlice,whichStat,value)
+	variable(unitSlice)
+	if(sliceIsValid(who))then(unitSlice := who)
+	else(unitSlice := getNpcSlice(who))
+	setSliceExtra(unitSlice,whichStat,value)
 end
 
 script, selectUnit, unit, begin
-  if(lookupSlice(sli:tileSelector)) then(destroyTileSelector())
-  setSliceVisible(commandMenu, true)
- # if(selectedUnit == -1) then(
- #   playSound(1)
- #   ) #then
-  selectedUnit := unit
-  putSlice(makeTileSelector(),0,0)
+	if(lookupSlice(sli:tileSelector)) then(destroyTileSelector())
+	#setSliceVisible(commandMenu, true)
+#	 if(selectedUnit == -1) then(
+#   playSound(1)
+#   ) #then
+	selectedUnit := unit
+	putSlice(makeTileSelector(),0,0)
 
 end
 
 script, unselectUnit, begin
-  selectedUnit := -1
-  if(lookupSlice(sli:tileSelector)) then(destroyTileSelector())
-  setSliceVisible(commandMenu, false)
-  playSound(6)
-  state := state:idle
+	selectedUnit := -1
+	if(lookupSlice(sli:tileSelector)) then(destroyTileSelector())
+	resetCommandMenu()
+	#setSliceVisible(commandMenu, false)
+	playSound(6)
+	state := state:idle
 end
 
 script, breakPatrol, who, begin
-  variable(i,j)
-  i := 0
-  j := 0
-  for(i,0,mapWidth--1,1)do(
-    for(j,0,mapHeight--1,1)do(
-      if(readZone(getUnitStat(who,unitData:target), i, j) == true) then(
-          writeZone(getUnitStat(who,unitData:target), i, j, false)
-      )
-    )
-  )
-  setNpcMoves(who, false)
-  alterNpc(who,npcStat:moveType,npcMoveType:standstill)
-  alterNpc(who,npcStat:defaultMovementZone,0)
-  setUnitStat(who,unitData:directive,command:idle)
+	variable(i,j)
+	i := 0
+	j := 0
+	for(i,0,mapWidth--1,1)do(
+		for(j,0,mapHeight--1,1)do(
+			if(readZone(getUnitStat(who,unitData:target), i, j) == true) then(
+				writeZone(getUnitStat(who,unitData:target), i, j, false)
+			  )
+			)
+  		)
+	setNpcMoves(who, false)
+	alterNpc(who,npcStat:moveType,npcMoveType:standstill)
+	alterNpc(who,npcStat:defaultMovementZone,0)
+	setUnitStat(who,unitData:directive,command:idle)
 end
 
 # Script that allows the creation of random units from a menu, for debug purposes
-plotscript, unitFromMenu, menuHandle, class, begin
-  # we dont need the menuHandle argument for anything i just dont know how to make the menu not pass it
-  variable(diceX, diceY)
-  findRandomSpot()
-  createUnit(diceX, diceY, class) 
+plotscript, unitFromMenu, menuHandle, class, side, forceHero=false, begin
+# we dont need the menuHandle argument for anything i just dont know how to make the menu not pass it
+	variable(diceX, diceY)
 
-  subscript, findRandomSpot, begin
+	findRandomSpot()
+	unitGen(diceX, diceY, class, side, forceHero)
 
-    diceX := random(0,mapWidth(currentMap))
-    diceY := random(0,mapHeight(currentMap))
+	subscript, findRandomSpot, begin
+
+	diceX := random(0,mapWidth(currentMap))
+	diceY := random(0,mapHeight(currentMap))
   
-    if(npcAtSpot(diceX, diceY)) then(
-      findRandomSpot()
-      )
-  end #subscript
+	if(npcAtSpot(diceX, diceY)) then(
+	  findRandomSpot()
+	  )
+ 	end #subscript
 end
 
-# New UnitGen script for efOHRces
+# New UnitGen script for efOHRces 
+script, unitGen, x, y, class, side, forceHero=false, begin
+	#determine if we're rolling a Hero or not
+	variable(heroes)
+	if(forceHero==true)then(
+		createHero(x,y,class)
+		)else(
+		if(side==1)then(heroes := true)
+		if(heroes==false)then(createUnit(x,y,class,side))
+		elseif(random(1,20)==20)then(createHero(x,y,class))
+		else(createUnit(x,y,class,side))
+		)
+	npcIdCounter +=1
+end
 
-script, createUnit, x, y, class=1, begin
-  variable(newUnitNpc)
+script, createHero, x, y, class, begin
+	variable(dice,newHeroNpc,newHero,heroName,col,unitHpBar,unitSpiritBar,unitStatsBars)
+	dice := (random(1,10))
+	newHeroNpc := createGlobalNpc(npcIdCounter, x, y)
+	newHero := getNpcSlice(newHeroNpc)
+	resizeExtra(newHero,30)
+	col:=loadSliceCollection(9)
+	unitStatsBars:=lookupSlice(sli:unitMiniStatBars,col)
+	unitHpBar := lookupSlice(sli:unitMiniHpBar,col)
+	unitSpiritBar := lookupSlice(sli:unitMiniSpiritBar,col)
+	setParent(unitStatsBars,getNpcSlice(newHeroNpc))
+	freeSlice(col)
+	setUnitStat(newHeroNpc,unitData:hpBar,unitHpBar)
+	setUnitStat(newHeroNpc,unitData:spiritBar,unitSpiritBar)
+	switch(dice)do(
+		case(1)do(
+			if(checkTag(tag:BobMaga))then(
+				createUnit(x,y,class,1))
+			else(
+				alterNpc(newHeroNpc, npcStat:picture, 19)
+				alterNpc(newHeroNpc, npcStat:palette, 8)
+				setNpcSpeed(newHeroNpc, 1)
+				setUnitStat(newHeroNpc, unitData:firstName,100)
+				setUnitStat(newHeroNpc, unitData:last Name,100)
+				setUnitStat(newHeroNpc, unitData:class,unit:bobMaga)
+	  			setUnitStat(newHeroNpc, unitData:curHp,40)
+	  			setUnitStat(newHeroNpc, unitData:maxHp,40)
+	  			setUnitStat(newHeroNpc, unitData:defense,3)
+	  			setUnitStat(newHeroNpc, unitData:strength,2)
+	  			setUnitStat(newHeroNpc, unitData:attackSpeed,1)
+	  			setUnitStat(newHeroNpc, unitData:spirit,90)
+	  			setUnitStat(newHeroNpc, unitData:side,side:saved)
+	  			setTag(tag:BobMaga,true)
+				)
+			)
+		case(2)do(
+			if(checkTag(tag:BobTheHamster))then(
+				createUnit(x,y,class,1))
+			else(
+				alterNpc(newHeroNpc, npcStat:picture, 20)
+				alterNpc(newHeroNpc, npcStat:palette, 15)
+				setNpcSpeed(newHeroNpc, 3)
+				setUnitStat(newHeroNpc, unitData:firstName,101)
+				setUnitStat(newHeroNpc, unitData:lastName,101)
+				setUnitStat(newHeroNpc, unitData:class,unit:bobTheHamster)
+	  			setUnitStat(newHeroNpc, unitData:curHp,10)
+	  			setUnitStat(newHeroNpc, unitData:maxHp,10)
+	  			setUnitStat(newHeroNpc, unitData:defense,2)
+	  			setUnitStat(newHeroNpc, unitData:strength,2)
+	  			setUnitStat(newHeroNpc, unitData:attackSpeed,1)
+	  			setUnitStat(newHeroNpc, unitData:spirit,90)
+	  			setUnitStat(newHeroNpc, unitData:side,side:saved)
+	  			setTag(tag:BobTheHamster,true)
+				)
+			)
+		case(3)do(
+			if(checkTag(tag:SantaClaus))then(
+				createUnit(x,y,class,1))
+			else(
+				alterNpc(newHeroNpc, npcStat:picture, 21)
+				alterNpc(newHeroNpc, npcStat:palette, 10)
+				alterNpc(newHeroNpc, npcStat:moveSpeed,1)
+				setUnitStat(newHeroNpc, unitData:firstName,104)
+				setUnitStat(newHeroNpc, unitData:lastName,104)
+				setUnitStat(newHeroNpc, unitData:class,unit:santaClaus)
+	  			setUnitStat(newHeroNpc, unitData:curHp,40)
+	  			setUnitStat(newHeroNpc, unitData:maxHp,40)
+	  			setUnitStat(newHeroNpc, unitData:defense,3)
+	  			setUnitStat(newHeroNpc, unitData:strength,2)
+	  			setUnitStat(newHeroNpc, unitData:attackSpeed,1)
+	  			setUnitStat(newHeroNpc, unitData:spirit,90)
+	  			setUnitStat(newHeroNpc, unitData:side,side:saved)
+				setTag(tag:SantaClaus,true)
+				)
+			)
+		case(4)do(
+			if(checkTag(tag:timTim))then(
+				createUnit(x,y,class,1))
+			else(
+				alterNpc(newHeroNpc, npcStat:picture, 22)
+				alterNpc(newHeroNpc, npcStat:palette, 11)
+				setNpcSpeed(newHeroNpc, 2)
+				setUnitStat(newHeroNpc, unitData:firstName,105)
+				setUnitStat(newHeroNpc, unitData:lastName,105)
+				setUnitStat(newHeroNpc, unitData:class,unit:timTim)
+	  			setUnitStat(newHeroNpc, unitData:curHp,10)
+	  			setUnitStat(newHeroNpc, unitData:maxHp,10)
+	  			setUnitStat(newHeroNpc, unitData:defense,3)
+	  			setUnitStat(newHeroNpc, unitData:strength,4)
+	  			setUnitStat(newHeroNpc, unitData:attackSpeed,3)
+	  			setUnitStat(newHeroNpc, unitData:spirit,90)
+	  			setUnitStat(newHeroNpc, unitData:side,side:saved)
+	  			setTag(tag:timTim,true)
+				)
+			)
+		case(5)do(
+			if(checkTag(tag:Frumpy))then(
+				createunit(x,y,class,1))
+			else(
+				alterNpc(newHeroNpc, npcStat:picture, 23)
+				alterNpc(newHeroNpc, npcStat:palette, 12)
+				alterNpc(newHeroNpc, npcStat:moveSpeed,1)
+				setUnitStat(newHeroNpc, unitData:firstName,106)
+				setUnitStat(newHeroNpc, unitData:lastName,106)
+				setUnitStat(newHeroNpc, unitData:class,unit:frumpy)
+	  			setUnitStat(newHeroNpc, unitData:curHp,40)
+	  			setUnitStat(newHeroNpc, unitData:maxHp,40)
+	  			setUnitStat(newHeroNpc, unitData:defense,3)
+	  			setUnitStat(newHeroNpc, unitData:strength,2)
+	  			setUnitStat(newHeroNpc, unitData:attackSpeed,1)
+	  			setUnitStat(newHeroNpc, unitData:spirit,100)
+	  			setUnitStat(newHeroNpc, unitData:side,side:saved)
+				setTag(tag:frumpy,true)
+				)
+			)
+		case(6)do(
+			if(checkTag(tag:KyleKitatain))then(
+				createunit(x,y,class,1))
+			else(
+				alterNpc(newHeroNpc, npcStat:picture, 24)
+				alterNpc(newHeroNpc, npcStat:palette, 13)
+				alterNpc(newHeroNpc, npcStat:moveSpeed,1)
+				setUnitStat(newHeroNpc, unitData:firstName,102)
+				setUnitStat(newHeroNpc, unitData:lastName,102)
+				setUnitStat(newHeroNpc, unitData:class,unit:kyleKitatain)
+	  			setUnitStat(newHeroNpc, unitData:curHp,50)
+	  			setUnitStat(newHeroNpc, unitData:maxHp,50)
+	  			setUnitStat(newHeroNpc, unitData:defense,5)
+	  			setUnitStat(newHeroNpc, unitData:strength,3)
+	  			setUnitStat(newHeroNpc, unitData:attackSpeed,1)
+	  			setUnitStat(newHeroNpc, unitData:spirit,60)
+	  			setUnitStat(newHeroNpc, unitData:side,side:saved)
+				setTag(tag:KyleKitatain,true)
+				)
+			)
+		case(7)do(
+			if(checkTag(tag:HatiLunaris))then(
+				createunit(x,y,class,1))
+			else(
+				alterNpc(newHeroNpc, npcStat:picture, 25)
+				alterNpc(newHeroNpc, npcStat:palette, 14)
+				alterNpc(newHeroNpc, npcStat:moveSpeed,1)
+				setUnitStat(newHeroNpc, unitData:firstName,103)
+				setUnitStat(newHeroNpc, unitData:lastName,103)
+				setUnitStat(newHeroNpc, unitData:class,unit:hatiLunaris)
+	  			setUnitStat(newHeroNpc, unitData:curHp,40)
+	  			setUnitStat(newHeroNpc, unitData:maxHp,40)
+	  			setUnitStat(newHeroNpc, unitData:defense,3)
+	  			setUnitStat(newHeroNpc, unitData:strength,2)
+	  			setUnitStat(newHeroNpc, unitData:attackSpeed,1)
+	  			setUnitStat(newHeroNpc, unitData:spirit,100)
+	  			setUnitStat(newHeroNpc, unitData:side,side:saved)
+				setTag(tag:HatiLunaris,true)
+				)
+			)
+		case(else)do(
+			createUnit(x,y,class,1)
+			)
+		)
+end
+
+script, createUnit, x, y, class, side, begin
+	variable(newUnitNpc,col,unitStatsBars,unitHpBar,unitSpiritBar)
 
 # First we make an NPC and place it on the map
-  newUnitNpc := createGlobalNpc(npcIdCounter, x, y)
+	newUnitNpc := createGlobalNpc(npcIdCounter, x, y)
+
 
 # Give our unit a unique appearance
-  alterNpc(newUnitNpc, npcStat:picture, random(0,2))
-  alterNpc(newUnitNpc, npcStat:palette, random(1,3))
-  alterNpc(newUnitNpc, npcStat:moveSpeed,1)
+	alterNpc(newUnitNpc, npcStat:picture, random(0,2))
+	#alterNpc(newUnitNpc, npcStat:palette, random(1,3))
+	alterNpc(newUnitNpc, npcStat:moveSpeed,1)
 # Hand off the NPC handle and class argument to the statgen script
-  unitStatsGen(newUnitNpc, class)
+	unitStatsGen(newUnitNpc, class, side)
+
+	col:=loadSliceCollection(9)
+	unitStatsBars:=lookupSlice(sli:unitMiniStatBars,col)
+	unitHpBar := lookupSlice(sli:unitMiniHpBar,col)
+	unitSpiritBar := lookupSlice(sli:unitMiniSpiritBar,col)
+	setParent(unitStatsBars,getNpcSlice(newUnitNpc))
+	freeSlice(col)
+	setUnitStat(newUnitNpc,unitData:hpBar,unitHpBar)
+	setUnitStat(newUnitNpc,unitData:spiritBar,unitSpiritBar)
+	#putSlice(unitHpBar,npcPixelX(newUnitNpc),npcPixelY(newUnitNpc)--10)
 
 # Increment the counter so every unit will have a unique NPC ID
-  npcIdCounter += 1
+#	npcIdCounter += 1
 end
 
-script, unitStatsGen, unit, class, begin
-  variable(unitName, unitSetup, nclass)
+script, unitStatsGen, unit, class, side, begin
+	variable(unitName, unitSetup, nclass)
 
-  unitSetup := getNpcSlice(unit)
+	unitSetup := getNpcSlice(unit)
 
 # We used to use a text slice to hold data, it's here now to hold a randomly generated name but this too will eventually be phased out in favor of having a database of individual profiles.
-  nclass := class
-  unitName := createText
-  setSliceVisible(unitName, false)
-  setParent(unitName, unitSetup) 
+	nclass := class
+#	unitName := createText
+#	setSliceVisible(unitName, false)
+#	setParent(unitName, unitSetup) 
 
 # Expand the extra data slots on the NPC slice
-  resizeExtra(unitSetup, 15)
+	resizeExtra(unitSetup, 30)
 # Set up slots with stats depending on the unit's class
-  setUnitClass(unit, nclass)
+	setUnitClass(unit, nclass)
 # Assign unit initial affiliation
-  setUnitSide(unit)
+	setUnitSpirit(unit, side)
 # Randomly assign a history file. This should have checks in it to ensure that no backstory gets used twice.
-  setUnitStat(unit, unitData:backstory, random(1,100))
+#	setUnitStat(unit, unitData:backstory, random(1,100))
 # Randomly generate a name and write it to the text slice we created. This should eventually be obsoleted when we make the backstory system
-  getFirstName()
-  getLastName()
-  setSliceText(unitName, 1)
+	setUnitStat(unit, unitData:firstName, random(1,52))
+	setUnitStat(unit, unitData:lastName, random(1,26))
+	setUnitStat(unit, unitData:age, 18+random(1,20)+random(1,20))
+end
+
+script,setUnitSpirit, unit, side, begin
+	switch(side)do(
+		case(0)do(setUnitStat(unit,unitData:spirit,random(40,59) ) )
+		case(1)do(setUnitStat(unit,unitData:spirit,random(60,100) ) )
+		case(2,3)do(setUnitStat(unit,unitData:spirit,random(0,39) ) )
+		)
+end
+
+script, setUnitLevel, unit, level=0, begin
+	variable(ulev,uexp)
+	ulev := getUnitStat(unit,unitData:level)
+	uexp := getUnitStat(unit,unitData:experience)
+
+	if(level>>ulev)then(
+		switch(level)do(
+			case(1)do(
+				setUnitStat(unit,unitData:experience,100)
+				)
+			case(2)do(
+				setUnitStat(unit,unitData:experience,500)
+				)
+			case(3)do(
+				setUnitStat(unit,unitData:experience,1500)
+				)
+			)
+		)
+	switch(uexp/100)do(
+		case(0)do()
+		case(1,2,3,4)do(
+			if(ulev<<1)then(
+				setUnitStat(unit,unitData:level,1)
+				)
+			)
+		case(5,6,7,8,9,10,11,12,13,14)do(
+			if(ulev<<2)then(
+				setUnitStat(unit,unitData:level,2)
+				)
+			)
+		case(15,16,17,18,19,20)do(
+			if(ulev<<3)then(
+				setUnitStat(unit,unitData:level,3)
+				)
+			)
+		case(else)do()
+		)
 end
 
 script, setUnitSide, unit, begin
-  switch(getUnitStat(unit, unitData:spirit)/10) do(
-    case(0,1,2,3)do(
-      setUnitStat(unit, unitData:side, side:damned)
-      )
-    case(4,5)do(
-      setUnitStat(unit, unitData:side, side:neutral)
-      )
-    case(6,7,8,9,10) do(
-      setUnitStat(unit, unitData:side, side:saved)
-      )
-    )
+	switch(getUnitStat(unit, unitData:spirit)/10) do(
+		case(0,1,2,3)do(
+	  		setUnitStat(unit, unitData:side, side:damned)
+	  		if(getUnitStat(unit,unitData:class)<<100)then(alterNpc(unit, npcStat:palette, 1))
+	  		)
+		case(4,5)do(
+	  		setUnitStat(unit, unitData:side, side:neutral)
+	  		if(getUnitStat(unit,unitData:class)<<100)then(alterNpc(unit, npcStat:palette, 2))
+	  		)
+		case(6,7,8,9,10) do(
+	  		setUnitStat(unit, unitData:side, side:saved)
+	  		if(getUnitStat(unit,unitData:class)<<100)then(alterNpc(unit, npcStat:palette, 3))
+	  		)
+		)
 end
 
 script, setUnitClass, unit, class=0, begin
-  variable(nclass)
-  nclass := class
-  switch(nclass) do(
-    case(unit:civilian) do(
-      setUnitStat(unit, unitData:class,0)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,50)     )
+	variable(nclass)
+	nclass := class
+	switch(nclass) do(
+		case(unit:civilian) do(
+			setUnitStat(unit, unitData:class,0)
+	  		setUnitStat(unit, unitData:curHp,10)
+	  		setUnitStat(unit, unitData:maxHp,10)
+	  		setUnitStat(unit, unitData:defense,0)
+	  		setUnitStat(unit, unitData:strength,2)
+	  		setUnitStat(unit, unitData:attackSpeed,1)
+#	  		setUnitStat(unit, unitData:spirit,50)
+	  		)
 
-    case(unit:disciple) do(
-      setUnitStat(unit, unitData:class,1)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,100)
-      )
+		case(unit:disciple) do(
+			setUnitStat(unit, unitData:class,1)
+			setUnitStat(unit, unitData:curHp,10)
+			setUnitStat(unit, unitData:maxHp,10)
+			setUnitStat(unit, unitData:defense,0)
+			setUnitStat(unit, unitData:strength,2)
+			setUnitStat(unit, unitData:attackSpeed,1)
+#			setUnitStat(unit, unitData:spirit,100)
+			)
 
-    case(unit:friend) do(
-      setUnitStat(unit, unitData:class,2)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,80)
-      )
+		case(unit:friend) do(
+	  		setUnitStat(unit, unitData:class,2)
+	  		setUnitStat(unit, unitData:curHp,10)
+	  		setUnitStat(unit, unitData:maxHp,10)
+	  		setUnitStat(unit, unitData:defense,0)
+	  		setUnitStat(unit, unitData:strength,2)
+	  		setUnitStat(unit, unitData:attackSpeed,1)
+#	  		setUnitStat(unit, unitData:spirit,80)
+	  		)
 
-    case(unit:medic) do(
-      setUnitStat(unit, unitData:class,3)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,80)
-      )
+		case(unit:medic) do(
+	  		setUnitStat(unit, unitData:class,3)
+	  		setUnitStat(unit, unitData:curHp,10)
+	  		setUnitStat(unit, unitData:maxHp,10)
+	  		setUnitStat(unit, unitData:defense,0)
+	  		setUnitStat(unit, unitData:strength,2)
+	  		setUnitStat(unit, unitData:attackSpeed,1)
+#	  		setUnitStat(unit, unitData:spirit,80)
+	  		)
 
-    case(unit:builder) do(
-      setUnitStat(unit, unitData:class,4)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,80)
-      )
+		case(unit:builder) do(
+	  		setUnitStat(unit, unitData:class,4)
+	  		setUnitStat(unit, unitData:curHp,10)
+	  		setUnitStat(unit, unitData:maxHp,10)
+	  		setUnitStat(unit, unitData:defense,0)
+	  		setUnitStat(unit, unitData:strength,2)
+	  		setUnitStat(unit, unitData:attackSpeed,1)
+#	  		setUnitStat(unit, unitData:spirit,80)
+	  		)
 
-    case(unit:musician) do(
-      setUnitStat(unit, unitData:class,5)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,80)
-      )
+		case(unit:musician) do(
+	  		setUnitStat(unit, unitData:class,5)
+	  		setUnitStat(unit, unitData:curHp,10)
+	  		setUnitStat(unit, unitData:maxHp,10)
+	  		setUnitStat(unit, unitData:defense,0)
+	  		setUnitStat(unit, unitData:strength,2)
+	  		setUnitStat(unit, unitData:attackSpeed,1)
+#	  		setUnitStat(unit, unitData:spirit,80)
+	  		)
 
-    case(unit:soldier) do(
-      setUnitStat(unit, unitData:class,6)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,80)
-      )
+		case(unit:soldier) do(
+	  		setUnitStat(unit, unitData:class,6)
+	  		setUnitStat(unit, unitData:curHp,10)
+	  		setUnitStat(unit, unitData:maxHp,10)
+	  		setUnitStat(unit, unitData:defense,3)
+	  		setUnitStat(unit, unitData:strength,5)
+	  		setUnitStat(unit, unitData:attackSpeed,5)
+#	  		setUnitStat(unit, unitData:spirit,80)
+	  		)
 
-    case(else) do(
-      setUnitStat(unit, unitData:class,7)
-      setUnitStat(unit, unitData:curHp,10)
-      setUnitStat(unit, unitData:maxHp,10)
-      setUnitStat(unit, unitData:defense,0)
-      setUnitStat(unit, unitData:strength,0)
-      setUnitStat(unit, unitData:attackSpeed,1)
-      setUnitStat(unit, unitData:spirit,80)
-      )
+		case(else) do(
+	  		setUnitStat(unit, unitData:class,7)
+	  		setUnitStat(unit, unitData:curHp,10)
+	  		setUnitStat(unit, unitData:maxHp,10)
+	  		setUnitStat(unit, unitData:defense,3)
+	  		setUnitStat(unit, unitData:strength,3)
+	  		setUnitStat(unit, unitData:attackSpeed,3)
+#	  		setUnitStat(unit, unitData:spirit,80)
+	  		)
 
-    )
+		)
 
 
 end
@@ -221,96 +791,184 @@ end
 #   )
 #end
 
-script, getFirstName, begin
-  switch(random(1,52)) do(
-      case(1)  do ($1="Art ")
-      case(2)  do ($1="Bob ")
-      case(3)  do ($1="Chip ")
-      case(4)  do ($1="Dan ")
-      case(5)  do ($1="Ed ")
-      case(6)  do ($1="Fred ")
-      case(7)  do ($1="Greg ")
-      case(8)  do ($1="Harry ")
-      case(9)  do ($1="Ian ")
-      case(10) do ($1="Jeff ")
-      case(11) do ($1="Kyle ")
-      case(12) do ($1="Leo ")
-      case(13) do ($1="Mike ")
-      case(14) do ($1="Nate ")
-      case(15) do ($1="Oscar ")
-      case(16) do ($1="Pete ")
-      case(17) do ($1="Quentin ")
-      case(18) do ($1="Randy ")
-      case(19) do ($1="Simon ")
-      case(20) do ($1="Theo ")
-      case(21) do ($1="Umbert ")
-      case(22) do ($1="Victor ")
-      case(23) do ($1="William ")
-      case(24) do ($1="Xerxes ")
-      case(25) do ($1="Yakob ")
-      case(26) do ($1="Zed ")
-      case(27) do ($1="Ashley ")
-      case(28) do ($1="Bella ")
-      case(29) do ($1="Cheri ")
-      case(30) do ($1="Debbie ")
-      case(31) do ($1="Emily ")
-      case(32) do ($1="Fran ")
-      case(33) do ($1="Grace ")
-      case(34) do ($1="Hattie ")
-      case(35) do ($1="Iris ")
-      case(36) do ($1="Jane ")
-      case(37) do ($1="Karen ")
-      case(38) do ($1="Laurel ")
-      case(39) do ($1="Marge ")
-      case(40) do ($1="Noelle ")
-      case(41) do ($1="Olette ")
-      case(42) do ($1="Pamela ")
-      case(43) do ($1="Quille ")
-      case(44) do ($1="Renee ")
-      case(45) do ($1="Sarah ")
-      case(46) do ($1="Teri ")
-      case(47) do ($1="Urta ")
-      case(48) do ($1="Vanesa ")
-      case(49) do ($1="Wendy ")
-      case(50) do ($1="Xena ")
-      case(51) do ($1="Yanni ")
-      case(52) do ($1="Zoe ")
-      case(else)do($1="Firstname ")
-    )
+script, getFirstName, index, begin
+  	switch(index) do(
+	  	case(1)  do ($1="Art ")
+	  	case(2)  do ($1="Bob ")
+	  	case(3)  do ($1="Chip ")
+	  	case(4)  do ($1="Dan ")
+	  	case(5)  do ($1="Ed ")
+	  	case(6)  do ($1="Fred ")
+	  	case(7)  do ($1="Greg ")
+	  	case(8)  do ($1="Harry ")
+	  	case(9)  do ($1="Ian ")
+	  	case(10) do ($1="Jeff ")
+	  	case(11) do ($1="Kyle ")
+	  	case(12) do ($1="Leo ")
+	  	case(13) do ($1="Mike ")
+	  	case(14) do ($1="Nate ")
+	  	case(15) do ($1="Oscar ")
+	  	case(16) do ($1="Pete ")
+	  	case(17) do ($1="Quentin ")
+	  	case(18) do ($1="Randy ")
+	  	case(19) do ($1="Simon ")
+	  	case(20) do ($1="Theo ")
+	  	case(21) do ($1="Umbert ")
+	  	case(22) do ($1="Victor ")
+	  	case(23) do ($1="William ")
+	  	case(24) do ($1="Xerxes ")
+	  	case(25) do ($1="Yakob ")
+	  	case(26) do ($1="Zed ")
+	  	case(27) do ($1="Ashley ")
+	  	case(28) do ($1="Bella ")
+	  	case(29) do ($1="Cheri ")
+	  	case(30) do ($1="Debbie ")
+	  	case(31) do ($1="Emily ")
+	  	case(32) do ($1="Fran ")
+	  	case(33) do ($1="Grace ")
+	  	case(34) do ($1="Hattie ")
+	  	case(35) do ($1="Iris ")
+	  	case(36) do ($1="Jane ")
+	  	case(37) do ($1="Karen ")
+	  	case(38) do ($1="Laurel ")
+	  	case(39) do ($1="Marge ")
+	  	case(40) do ($1="Noelle ")
+	  	case(41) do ($1="Olette ")
+	  	case(42) do ($1="Pamela ")
+	  	case(43) do ($1="Quille ")
+	  	case(44) do ($1="Renee ")
+	  	case(45) do ($1="Sarah ")
+	  	case(46) do ($1="Teri ")
+	  	case(47) do ($1="Urta ")
+	  	case(48) do ($1="Vanesa ")
+	  	case(49) do ($1="Wendy ")
+	  	case(50) do ($1="Xena ")
+	  	case(51) do ($1="Yanni ")
+	  	case(52) do ($1="Zoe ")
+
+	# Hero Names
+		case(100) do ($1="Bob ")
+		case(101) do ($1="Bob ")
+		case(102) do ($1="Kyle ")
+		case(103) do ($1="Hati ")
+		case(104) do ($1="Santa ")
+		case(105) do ($1="Tim-")
+		case(106) do ($1="Brother ")
+
+	  	case(else)do($1="Firstname ")
+		)
 end
 
-script, getLastName, begin
-  switch(random(1,26)) do(
-      case(1)  do ($1+"Andre")
-      case(2)  do ($1+"Biles")
-      case(3)  do ($1+"Charles")
-      case(4)  do ($1+"Dorn")
-      case(5)  do ($1+"Eldar")
-      case(6)  do ($1+"Fikes")
-      case(7)  do ($1+"Gale")
-      case(8)  do ($1+"Hickman")
-      case(9)  do ($1+"Icke")
-      case(10) do ($1+"Jintov")
-      case(11) do ($1+"Kitarn")
-      case(12) do ($1+"Lipco")
-      case(13) do ($1+"McAdoo")
-      case(14) do ($1+"Nedry")
-      case(15) do ($1+"Oscar")
-      case(16) do ($1+"Peters")
-      case(17) do ($1+"Quinn")
-      case(18) do ($1+"Reagan")
-      case(19) do ($1+"Smith")
-      case(20) do ($1+"Tull")
-      case(21) do ($1+"Ulric")
-      case(22) do ($1+"Verl")
-      case(23) do ($1+"White")
-      case(24) do ($1+"Xian")
-      case(25) do ($1+"Yellman")
-      case(26) do ($1+"Zimmer")
-      case(else)do($1+"Last")
-  )
+script, getLastName, index, begin
+  	switch(index) do(
+		case(1)  do ($1+"Andre")
+		case(2)  do ($1+"Biles")
+		case(3)  do ($1+"Charles")
+		case(4)  do ($1+"Dorn")
+		case(5)  do ($1+"Eldar")
+		case(6)  do ($1+"Fikes")
+		case(7)  do ($1+"Gale")
+		case(8)  do ($1+"Hickman")
+		case(9)  do ($1+"Icke")
+		case(10) do ($1+"Jintov")
+		case(11) do ($1+"Kitarn")
+		case(12) do ($1+"Lipco")
+		case(13) do ($1+"McAdoo")
+		case(14) do ($1+"Nedry")
+		case(15) do ($1+"Oscar")
+		case(16) do ($1+"Peters")
+		case(17) do ($1+"Quinn")
+		case(18) do ($1+"Reagan")
+		case(19) do ($1+"Smith")
+		case(20) do ($1+"Tull")
+		case(21) do ($1+"Ulric")
+		case(22) do ($1+"Verl")
+		case(23) do ($1+"White")
+		case(24) do ($1+"Xian")
+		case(25) do ($1+"Yellman")
+		case(26) do ($1+"Zimmer")
+
+
+	# Hero Names
+
+		case(100) do ($1+"Maga")
+		case(101) do ($1+"Hamster")
+		case(102) do ($1+"Kitatain")
+		case(103) do ($1+"Hrodvitnisdottir")
+		case(104) do ($1+"Claus")
+		case(105) do ($1+"Tim")
+		case(106) do ($1+"Frumpy")
+
+
+
+		case(else)do($1+"Last")
+  		)
 end
 
 script, getUnitsInRange, begin
 
+end
+
+script, getBackstory, index, begin
+	switch(index)do(case(1)do($0="Example") )
+	switch(index)do(case(2)do($0="Example") )
+	switch(index)do(case(3)do($0="Example") )
+	switch(index)do(case(4)do($0="Example") )
+	switch(index)do(case(5)do($0="Example") )
+	switch(index)do(case(6)do($0="Example") )
+	switch(index)do(case(7)do($0="Example") )
+	switch(index)do(case(8)do($0="Example") )
+	switch(index)do(case(9)do($0="Example") )
+	switch(index)do(case(10)do($0="Example") )
+	switch(index)do(case(11)do($0="Example") )
+	switch(index)do(case(12)do($0="Example") )
+	switch(index)do(case(13)do($0="Example") )
+	switch(index)do(case(14)do($0="Example") )
+	switch(index)do(case(15)do($0="Example") )
+	switch(index)do(case(16)do($0="Example") )
+	switch(index)do(case(17)do($0="Example") )
+	switch(index)do(case(18)do($0="Example") )
+	switch(index)do(case(19)do($0="Example") )
+	switch(index)do(case(20)do($0="Example") )
+	switch(index)do(case(21)do($0="Example") )
+	switch(index)do(case(22)do($0="Example") )
+	switch(index)do(case(23)do($0="Example") )
+	switch(index)do(case(24)do($0="Example") )
+	switch(index)do(case(25)do($0="Example") )
+	switch(index)do(case(26)do($0="Example") )
+	switch(index)do(case(27)do($0="Example") )
+	switch(index)do(case(28)do($0="Example") )
+	switch(index)do(case(29)do($0="Example") )
+	switch(index)do(case(30)do($0="Example") )
+	switch(index)do(case(31)do($0="Example") )
+	switch(index)do(case(32)do($0="Example") )
+	switch(index)do(case(33)do($0="Example") )
+	switch(index)do(case(34)do($0="Example") )
+	switch(index)do(case(35)do($0="Example") )
+	switch(index)do(case(36)do($0="Example") )
+	switch(index)do(case(37)do($0="Example") )
+	switch(index)do(case(38)do($0="Example") )
+	switch(index)do(case(39)do($0="Example") )
+	switch(index)do(case(40)do($0="Example") )
+	switch(index)do(case(41)do($0="Example") )
+	switch(index)do(case(42)do($0="Example") )
+	switch(index)do(case(43)do($0="Example") )
+	switch(index)do(case(44)do($0="Example") )
+	switch(index)do(case(45)do($0="Example") )
+	switch(index)do(case(46)do($0="Example") )
+	switch(index)do(case(47)do($0="Example") )
+	switch(index)do(case(48)do($0="Example") )
+	switch(index)do(case(49)do($0="Example") )
+	switch(index)do(case(50)do($0="Example") )
+	switch(index)do(case(51)do($0="Example") )
+	switch(index)do(case(52)do($0="Example") )
+
+  # Hero Backstories
+	switch(index)do(case(100)do($0="Example") )
+	switch(index)do(case(101)do($0="Example") )
+	switch(index)do(case(102)do($0="Example") )
+	switch(index)do(case(103)do($0="Example") )
+	switch(index)do(case(104)do($0="Example") )
+	switch(index)do(case(105)do($0="Example") )
+	switch(index)do(case(106)do($0="Example") )
 end
